@@ -32,29 +32,31 @@ def main():
     pixels_list[0].auto_write = False
 
     while True:
-        percent = (time.time() / 6) % 1
+        seconds = time.time()
+        direction = 1
+        spot = seconds % 40
+        if spot <= 1:
+            direction = (spot - .5) / 0.5
+        elif 20 <= spot <= 21:
+            direction = (spot - 20.5) / -0.5
+        elif spot > 21:
+            direction = -1
+        percent = (seconds * 0.75) % 1
+        percent *= direction
         for pixels in pixels_list:
             for i in range(len(pixels)):
                 color = get_rainbow((percent + i * 0.02) % 1)
                 r = color[0] / 255
                 g = color[1] / 255
                 b = color[2] / 255
-
-                if i >= 240:
-                    r **= 1.8
-                    g **= 1.7
-                    b **= 0.1
-                elif i >= 200:
-                    r **= 1.4
-                    g **= 1.2
-                    b **= 0.2
-                elif i >= 150:
-                    r **= 1.2
-                    g **= 1.1
-                    b **= 0.3
+                if i < 50:
+                    dim_amount = i / 50
+                    r *= dim_amount
+                    g *= dim_amount
+                    b *= dim_amount
                 pixels[i] = (DIM * r * 255, DIM * g * 255, DIM * b * 255)
             pixels.show()
-        time.sleep(.1)
+        time.sleep(.02)
 
 
 if __name__ == '__main__':
