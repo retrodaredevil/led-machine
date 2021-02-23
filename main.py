@@ -5,6 +5,8 @@ import neopixel
 import time
 
 DIM = 0.8
+PERIOD = 2.0
+DIRECTION_PERIOD = 20.0
 
 
 def get_rainbow(percent: float) -> Tuple:
@@ -34,14 +36,14 @@ def main():
     while True:
         seconds = time.time()
         direction = 1
-        spot = seconds % 40
-        if spot <= 1:
-            direction = (spot - .5) / 0.5
-        elif 20 <= spot <= 21:
-            direction = (spot - 20.5) / -0.5
-        elif spot > 21:
+        spot = seconds % (DIRECTION_PERIOD * 2)
+        if spot <= PERIOD * 2:
+            direction = (spot - PERIOD) / PERIOD
+        elif DIRECTION_PERIOD <= spot <= (DIRECTION_PERIOD + 2 * PERIOD):
+            direction = (spot - DIRECTION_PERIOD - PERIOD) / -PERIOD
+        elif spot > DIRECTION_PERIOD + PERIOD:
             direction = -1
-        percent = (seconds * 0.75) % 1
+        percent = (seconds / PERIOD) % 1
         percent *= direction
         for pixels in pixels_list:
             for i in range(len(pixels)):
