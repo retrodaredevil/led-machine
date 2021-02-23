@@ -7,8 +7,11 @@ import time
 DIM = 0.8
 PERIOD = 2.0
 DIRECTION_PERIOD = 20.0
+REVERSE_PERIOD = 2.0
+LED_SPREAD = 50
 
 assert DIRECTION_PERIOD % PERIOD == 0, "The direction period must be a multiple of period!"
+assert REVERSE_PERIOD % PERIOD == 0, "The reverse period must be a multiple of period!"
 
 
 def get_rainbow(percent: float) -> Tuple:
@@ -39,18 +42,25 @@ def main():
         seconds = time.time()
         spot = seconds % (DIRECTION_PERIOD * 2)
         percent = (seconds / PERIOD) % 1
-        if spot <= PERIOD * 4:
-            x = (spot - PERIOD * 2) / (PERIOD * 2)
-            percent = x * x
-        elif DIRECTION_PERIOD <= spot <= (DIRECTION_PERIOD + 4 * PERIOD):
-            x = (spot - DIRECTION_PERIOD - PERIOD * 2) / (PERIOD * 2)
-            percent = 1 - (x * x)
+        if spot <= REVERSE_PERIOD:
+            a = PERIOD / REVERSE_PERIOD
+            x = (spot - REVERSE_PERIOD / 2) / PERIOD
+            height = REVERSE_PERIOD / 4 / PERIOD
+            percent = a * x * x + 1 - height
+        elif DIRECTION_PERIOD <= spot <= (DIRECTION_PERIOD + REVERSE_PERIOD):
+            # x = (spot - DIRECTION_PERIOD - PERIOD * 2) / (PERIOD * 2)
+
+            a = PERIOD / REVERSE_PERIOD
+            x = (spot - DIRECTION_PERIOD - REVERSE_PERIOD / 2) / PERIOD
+            height = REVERSE_PERIOD / 4 / PERIOD
+            # percent = 1 - (x * x)
+            percent = 1 - (a * x * x + 1 - height)
         elif spot > DIRECTION_PERIOD + PERIOD:
             percent *= -1
 
         for pixels in pixels_list:
             for i in range(len(pixels)):
-                color = get_rainbow((percent + i * 0.02) % 1)
+                color = get_rainbow((percent + i / LED_SPREAD) % 1)
                 r = color[0] / 255
                 g = color[1] / 255
                 b = color[2] / 255
