@@ -3,6 +3,7 @@ from typing import Tuple
 import board
 import neopixel
 import time
+import RPi.GPIO as GPIO
 
 DIM = 0.8
 PERIOD = 2.0
@@ -33,13 +34,37 @@ def get_rainbow(percent: float) -> Tuple:
 
 
 def main():
+    # GPIO.setwarnings(False)
+    GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+    def is_on():
+        return GPIO.input(23) == GPIO.LOW
+
     pixels_list = [
         neopixel.NeoPixel(board.D18, 300),  # AKA GPIO 18
     ]
     pixels_list[0].auto_write = False
 
+    on_start = None
+    off_start = None
+
     while True:
         seconds = time.time()
+        if is_on():
+            if on_start is None:
+                on_start = seconds
+            off_start = None
+        else:
+            if off_start is None:
+                off_start = seconds
+            on_start = None
+
+        on_off_dim = 1.0
+        if on_start is not None:
+            on_off_dim = min(1.0, seconds - on_start)
+        elif off_start is not None:
+            on_off_dim = max(0.0, 1.0 - seconds + off_start)
+
         spot = seconds % (DIRECTION_PERIOD * 2)
         percent = (seconds / PERIOD) % 1
         if spot <= REVERSE_PERIOD:
@@ -64,12 +89,10 @@ def main():
                 r = color[0] / 255
                 g = color[1] / 255
                 b = color[2] / 255
+                dim_amount = DIM * on_off_dim
                 if i < 50:
-                    dim_amount = i / 50
-                    r *= dim_amount
-                    g *= dim_amount
-                    b *= dim_amount
-                pixels[i] = (DIM * r * 255, DIM * g * 255, DIM * b * 255)
+                    dim_amount *= i / 50
+                pixels[i] = (int(dim_amount * r * 255), int(dim_amount * g * 255), int(dim_amount * b * 255))
             pixels.show()
         time.sleep(.02)
 
