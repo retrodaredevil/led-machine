@@ -1,5 +1,5 @@
 from abc import abstractmethod, ABC
-from typing import Tuple
+from typing import Tuple, Optional
 
 from led_machine.util import copy_pixels_list
 
@@ -29,12 +29,16 @@ class AlterPixelSetting(LedSetting, ABC):
 
 
 class DimSetting(AlterPixelSetting):
-    def __init__(self, setting: LedSetting, dim: float):
+    def __init__(self, setting: LedSetting, dim: float, pixel_range: Optional[Tuple[int, int]] = None):
         super().__init__(setting)
         self.dim = dim
+        self.pixel_range = pixel_range
 
     def alter(self, list_index: int, pixel_index: int, pixels, pixel_color) -> Tuple[int, int, int]:
-        return pixel_color[0] * self.dim, pixel_color[1] * self.dim, pixel_color[2] * self.dim
+        dim_setting = 1
+        if self.pixel_range is None or self.pixel_range[0] <= pixel_index <= self.pixel_range[1]:
+            dim_setting = self.dim
+        return pixel_color[0] * dim_setting, pixel_color[1] * dim_setting, pixel_color[2] * dim_setting
 
 
 class FrontDimSetting(AlterPixelSetting):

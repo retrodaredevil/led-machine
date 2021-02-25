@@ -35,19 +35,24 @@ def main():
 
     slack_token = config["slack_token"]
     slack_channel = config["slack_channel"]
-    slack = SlackHelper(slack_token, slack_channel)
+    slack_helper = SlackHelper(slack_token, slack_channel)
 
     main_setting_holder = FrontDimSetting(RainbowSetting())
-    setting = DimSetting(main_setting_holder, DIM)
+    rear_dimmer = DimSetting(main_setting_holder, 1, (300, 300 - 47))
+    setting = DimSetting(rear_dimmer, DIM)
     dim_setting = 1
     while True:
-        slack.update()
-        for message in slack.new_messages():
+        slack_helper.update()
+        for message in slack_helper.new_messages():
             text: str = message["text"].lower()
             if "purple" in text:
-                main_setting_holder.setting = SolidSetting((255, 0, 140))
+                main_setting_holder.setting = SolidSetting((255, 0, 100))
             elif "red" in text:
                 main_setting_holder.setting = SolidSetting((255, 0, 0))
+            elif "green" in text:
+                main_setting_holder.setting = SolidSetting((0, 255, 0))
+            elif "blue" in text:
+                main_setting_holder.setting = SolidSetting((0, 0, 255))
             elif "white" in text:
                 main_setting_holder.setting = SolidSetting((255, 255, 255))
             elif "off" in text:
@@ -55,12 +60,20 @@ def main():
             elif "rainbow" in text:
                 main_setting_holder.setting = RainbowSetting()
 
-            if "normal" in text:
-                dim_setting = 1
-            elif "dim" in text:
-                dim_setting = 0.12
-            elif "sleep" in text:
-                dim_setting = 0.03
+            if "skyline" in text or "sky line" in text or "sky-line" in text:
+                dim_setting = 0.005
+                rear_dimmer.dim = 0.0
+            else:
+                rear_dimmer.dim = 1.0
+                if "normal" in text:
+                    dim_setting = 1
+                elif "dim" in text:
+                    dim_setting = 0.3
+                elif "dark" in text:
+                    dim_setting = 0.12
+                elif "sleep" in text:
+                    dim_setting = 0.01
+
         seconds = time.time()
         if is_on():
             if on_start is None:
