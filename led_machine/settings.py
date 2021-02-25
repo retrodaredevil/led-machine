@@ -54,6 +54,6 @@ class SolidSetting(LedSetting):
 
     def apply(self, seconds: float, pixels_list: list):
         for pixels in pixels_list:
-            for i in range(pixels):
+            for i in range(len(pixels)):
                 pixels[i] = self.color
 
