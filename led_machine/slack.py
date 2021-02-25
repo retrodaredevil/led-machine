@@ -14,16 +14,21 @@ class SlackHelper:
         self.future: Optional[Future] = None
         self.last_message_time: Optional[float] = None
         self.last_request: Optional[float] = None
+        self.last_cancel = None
 
     def update(self):
         seconds = time.time()
         if (self.last_request is None or (self.last_request + 2.5 < seconds
                                           and self.future is not None and self.future.done())
-                or self.last_request + 10.0 < seconds):
+                or self.last_request + 7.0 < seconds):
             if self.future is not None:
                 self.future.cancel()
+                self.future = None
+                self.last_cancel = seconds
             self.last_request = seconds
-            self.future = self.client.conversations_history(channel=self.channel, oldest=seconds - 30.0)
+            if self.last_cancel is not None and self.last_cancel + 3.0 > seconds:  # We've cancelled recently, so give it some time
+                return
+            self.future = self.client.conversations_history(channel=self.channel, oldest=seconds - 120.0, limit=10)
 
             # Yeah, I totally copied some of this: https://stackoverflow.com/a/325528/5434860
             def loop_in_thread(loop):
