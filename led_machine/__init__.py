@@ -1,11 +1,11 @@
 import time
+import json
+from pathlib import Path
 
-import RPi.GPIO as GPIO
-import board
-import neopixel
 
 from led_machine.rainbow import RainbowSetting
-from led_machine.settings import DimSetting
+from led_machine.settings import DimSetting, FrontDimSetting, SolidSetting
+from led_machine.slack import SlackHelper
 
 DIM = 0.8
 # DIM = 0.8 * 0.01  # good for really dim
@@ -13,6 +13,9 @@ DIM = 0.8
 
 
 def main():
+    import RPi.GPIO as GPIO
+    import board
+    import neopixel
     # GPIO.setwarnings(False)
     GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
@@ -27,8 +30,25 @@ def main():
     on_start = None
     off_start = None
 
-    setting = DimSetting(RainbowSetting(), DIM)
+    with Path("config.json").open() as file:
+        config = json.load(file)
+
+    slack_token = config["slack_token"]
+    slack_channel = config["slack_channel"]
+    slack = SlackHelper(slack_token, slack_channel)
+
+    main_setting_holder = FrontDimSetting(RainbowSetting())
+    setting = DimSetting(main_setting_holder, DIM)
     while True:
+        slack.update()
+        for message in slack.new_messages():
+            text: str = message["text"].lower()
+            if "purple" in text:
+                main_setting_holder.setting = SolidSetting((255, 0, 180))
+            elif "red" in text:
+                main_setting_holder.setting = SolidSetting((255, 0, 0))
+            elif "rainbow" in text:
+                main_setting_holder.setting = RainbowSetting()
         seconds = time.time()
         if is_on():
             if on_start is None:

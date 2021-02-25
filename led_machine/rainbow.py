@@ -38,8 +38,6 @@ class RainbowSetting(LedSetting):
                 g = color[1] / 255
                 b = color[2] / 255
                 dim_amount = 1
-                if i < 50:
-                    dim_amount *= i / 50
                 pixels[i] = (int(dim_amount * r * 255), int(dim_amount * g * 255), int(dim_amount * b * 255))
 
 

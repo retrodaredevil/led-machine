@@ -10,5 +10,7 @@ setup(
     url="https://github.com/retrodaredevil/led-machine",
     entry_points={"console_scripts": ["led-machine = led_machine:main",
                                       ]},
-    install_requires=["adafruit-circuitpython-neopixel"]
+    install_requires=["adafruit-circuitpython-neopixel",
+                      "slackclient",
+                      ]
 )

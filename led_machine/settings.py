@@ -37,6 +37,17 @@ class DimSetting(AlterPixelSetting):
         return pixel_color[0] * self.dim, pixel_color[1] * self.dim, pixel_color[2] * self.dim
 
 
+class FrontDimSetting(AlterPixelSetting):
+    def __init__(self, setting: LedSetting):
+        super().__init__(setting)
+
+    def alter(self, list_index: int, pixel_index: int, pixels, pixel_color) -> Tuple[int, int, int]:
+        dim_amount = 1
+        if pixel_index < 50:
+            dim_amount *= pixel_index / 50
+        return pixel_color[0] * dim_amount, pixel_color[1] * dim_amount, pixel_color[2] * dim_amount
+
+
 class SolidSetting(LedSetting):
     def __init__(self, color):
         self.color = color
