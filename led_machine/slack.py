@@ -21,7 +21,7 @@ class SlackHelper:
             if self.future is not None:
                 self.future.cancel()
             self.last_request = seconds
-            self.future = self.client.conversations_history(channel=self.channel)
+            self.future = self.client.conversations_history(channel=self.channel, oldest=seconds - 30.0)
 
             # Yeah, I totally copied some of this: https://stackoverflow.com/a/325528/5434860
             def loop_in_thread(loop):
