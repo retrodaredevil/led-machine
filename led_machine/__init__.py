@@ -39,16 +39,28 @@ def main():
 
     main_setting_holder = FrontDimSetting(RainbowSetting())
     setting = DimSetting(main_setting_holder, DIM)
+    dim_setting = 1
     while True:
         slack.update()
         for message in slack.new_messages():
             text: str = message["text"].lower()
             if "purple" in text:
-                main_setting_holder.setting = SolidSetting((255, 0, 180))
+                main_setting_holder.setting = SolidSetting((255, 0, 140))
             elif "red" in text:
                 main_setting_holder.setting = SolidSetting((255, 0, 0))
+            elif "white" in text:
+                main_setting_holder.setting = SolidSetting((255, 255, 255))
+            elif "off" in text:
+                main_setting_holder.setting = SolidSetting((0, 0, 0))
             elif "rainbow" in text:
                 main_setting_holder.setting = RainbowSetting()
+
+            if "normal" in text:
+                dim_setting = 1
+            elif "dim" in text:
+                dim_setting = 0.12
+            elif "sleep" in text:
+                dim_setting = 0.03
         seconds = time.time()
         if is_on():
             if on_start is None:
@@ -65,7 +77,7 @@ def main():
         elif off_start is not None:
             on_off_dim = max(0.0, 1.0 - seconds + off_start)
 
-        setting.dim = DIM * on_off_dim
+        setting.dim = DIM * on_off_dim * dim_setting
         setting.apply(seconds, pixels_list)
         for pixels in pixels_list:
             pixels.show()
