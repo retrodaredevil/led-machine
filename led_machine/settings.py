@@ -1,7 +1,7 @@
 from abc import abstractmethod, ABC
 from typing import Tuple
 
-from led_machine import copy_pixels_list
+from led_machine.util import copy_pixels_list
 
 
 class LedSetting(ABC):

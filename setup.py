@@ -8,7 +8,7 @@ setup(
     author_email="retrodaredevil@gmail.com",
     description="Manages LEDs",
     url="https://github.com/retrodaredevil/led-machine",
-    entry_points={"console_scripts": ["mp3-helper = led_machine:main",
+    entry_points={"console_scripts": ["led-machine = led_machine:main",
                                       ]},
     install_requires=["adafruit-circuitpython-neopixel"]
 )

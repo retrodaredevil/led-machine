@@ -1,5 +1,4 @@
 import time
-from typing import Tuple, Optional, List
 
 import RPi.GPIO as GPIO
 import board
@@ -11,10 +10,6 @@ from led_machine.settings import DimSetting
 DIM = 0.8
 # DIM = 0.8 * 0.01  # good for really dim
 # DIM = 0.8 * 0.12  # good for movie
-
-
-def copy_pixels_list(pixels_list: list) -> List[List[Optional[Tuple[int, int, int]]]]:
-    return [[None] * len(pixels) for pixels in pixels_list]
 
 
 def main():
