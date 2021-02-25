@@ -38,7 +38,7 @@ def main():
     slack_helper = SlackHelper(slack_token, slack_channel)
 
     main_setting_holder = FrontDimSetting(RainbowSetting())
-    rear_dimmer = DimSetting(main_setting_holder, 1, (300, 300 - 47))
+    rear_dimmer = DimSetting(main_setting_holder, 1, (300 - 47, 300))
     setting = DimSetting(rear_dimmer, DIM)
     dim_setting = 1
     while True:
