@@ -2,7 +2,7 @@ from led_machine.settings import LedSetting
 from typing import Tuple
 
 PERIOD = 2.0
-DIRECTION_PERIOD = 20.0
+DIRECTION_PERIOD = 10.0 * 60
 REVERSE_PERIOD = 2.0
 LED_SPREAD = 50
 
