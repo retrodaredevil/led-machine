@@ -17,7 +17,9 @@ class SlackHelper:
 
     def update(self):
         seconds = time.time()
-        if self.last_request is None or self.last_request + 2.5 < seconds:
+        if (self.last_request is None or (self.last_request + 2.5 < seconds
+                                          and self.future is not None and self.future.done())
+                or self.last_request + 10.0 < seconds):
             if self.future is not None:
                 self.future.cancel()
             self.last_request = seconds
