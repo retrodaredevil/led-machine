@@ -46,13 +46,21 @@ def main():
         for message in slack_helper.new_messages():
             text: str = message["text"].lower()
             if "purple" in text:
-                main_setting_holder.setting = SolidSetting((255, 0, 100))
+                main_setting_holder.setting = SolidSetting((255, 0, 70))
             elif "red" in text:
                 main_setting_holder.setting = SolidSetting((255, 0, 0))
             elif "green" in text:
                 main_setting_holder.setting = SolidSetting((0, 255, 0))
             elif "blue" in text:
                 main_setting_holder.setting = SolidSetting((0, 0, 255))
+            elif "orange" in text:
+                main_setting_holder.setting = SolidSetting((255, 165, 0))
+            elif "yellow" in text:
+                main_setting_holder.setting = SolidSetting((255, 255, 0))
+            elif "teal" in text:
+                main_setting_holder.setting = SolidSetting((0, 255, 255))
+            elif "brown" in text:
+                main_setting_holder.setting = SolidSetting((165, 42, 42))
             elif "white" in text:
                 main_setting_holder.setting = SolidSetting((255, 255, 255))
             elif "off" in text:
@@ -64,16 +72,19 @@ def main():
                 dim_setting = 0.005
                 rear_dimmer.dim = 0.0
             else:
-                rear_dimmer.dim = 1.0
+                unknown = False
                 if "normal" in text:
                     dim_setting = 1
                 elif "dim" in text:
                     dim_setting = 0.3
                 elif "dark" in text:
-                    dim_setting = 0.12
+                    dim_setting = 0.07
                 elif "sleep" in text:
                     dim_setting = 0.01
-
+                else:
+                    unknown = True
+                if not unknown:
+                    rear_dimmer.dim = 1.0
         seconds = time.time()
         if is_on():
             if on_start is None:
