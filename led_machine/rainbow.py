@@ -11,14 +11,10 @@ class RainbowSetting(LedSetting):
     def apply(self, seconds: float, pixels_list: list):
         percent = self.percent_getter.get_percent(seconds)
 
+        led_spread = self.led_spread
         for pixels in pixels_list:
             for i in range(len(pixels)):
-                color = get_rainbow((percent + i / self.led_spread) % 1)
-                r = color[0] / 255
-                g = color[1] / 255
-                b = color[2] / 255
-                dim_amount = 1
-                pixels[i] = (int(dim_amount * r * 255), int(dim_amount * g * 255), int(dim_amount * b * 255))
+                pixels[i] = get_rainbow((percent + i / led_spread) % 1)
 
 
 def get_rainbow(percent: float) -> Tuple:

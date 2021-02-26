@@ -41,7 +41,6 @@ class SlackHelper:
             import threading
             thread = threading.Thread(target=loop_in_thread, args=(event_loop,))
             thread.start()
-            thread.join()
 
             if self.last_message_time is None:
                 self.last_message_time = seconds

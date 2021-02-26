@@ -40,6 +40,7 @@ def main():
 
     default_percent_getter = ReversingPercentGetter(2.0, 10.0 * 60, 2.0)
     quick_default_percent_getter = ReversingPercentGetter(1.0, 10.0 * 60, 2.0)
+    slow_default_percent_getter = ReversingPercentGetter(4.0, 10.0 * 60, 4.0)
     rainbow_setting = RainbowSetting(default_percent_getter, 50)
     long_rainbow_setting = RainbowSetting(default_percent_getter, 300)
     solid_rainbow_setting = RainbowSetting(ReversingPercentGetter(6.0, 10.0 * 60, 6.0), 30000000000)
@@ -108,10 +109,10 @@ def main():
                 pattern_setting_holder.setting = main_setting_holder
             elif "carnival" in text:
                 pattern_setting_holder.setting = BlockSetting(main_setting_holder, [(None, 5), ((0, 0, 0), 3)],
-                                                              quick_default_percent_getter)
+                                                              slow_default_percent_getter)
             elif "single" in text:
                 pattern_setting_holder.setting = BlockSetting(main_setting_holder, [(None, 5), ((0, 0, 0), 295)],
-                                                              quick_default_percent_getter)
+                                                              slow_default_percent_getter)
         seconds = time.time()
         if is_on():
             if on_start is None:

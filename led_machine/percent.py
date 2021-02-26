@@ -31,8 +31,8 @@ class ReversingPercentGetter(PercentGetter):
             x = (spot - self.direction_period - self.reverse_period / 2) / self.period
             height = self.reverse_period / 4 / self.period
             percent = 1 - (a * x * x + 1 - height)
-        elif spot > self.direction_period + self.period:
-            percent *= -1
+        elif spot > self.direction_period + self.reverse_period:
+            percent = 1 - percent
 
         return percent
 
