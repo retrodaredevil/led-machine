@@ -78,4 +78,4 @@ class BouncePercentGetter(PercentGetter):
         spot = seconds % self.total_period
         if spot > self.total_period / 2:
             spot = self.total_period - spot
-        return spot / self.total_period
+        return spot / self.total_period * 2

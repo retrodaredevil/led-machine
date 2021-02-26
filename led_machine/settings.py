@@ -34,8 +34,7 @@ class AlterPixelSetting(LedSetting, ABC):
         for list_index, (pixels, pixels_copy) in enumerate(zip(pixels_list, pixels_list_copy)):
             for i in range(len(pixels)):
                 copied = pixels_copy[i]
-                if copied is not None:
-                    pixels[i] = self.alter(seconds, list_index, i, pixels, copied)
+                pixels[i] = self.alter(seconds, list_index, i, pixels, copied)
 
 
 class DimSetting(AlterPixelSetting):
