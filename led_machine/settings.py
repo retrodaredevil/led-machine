@@ -19,16 +19,18 @@ class LedSettingHolder(LedSetting):
 
 
 class AlterPixelSetting(LedSetting, ABC):
-    def __init__(self, setting: LedSetting):
-        self.setting = setting
+    def __init__(self, setting: Optional[LedSetting]):
+        self.setting: Optional[LedSetting] = setting
 
     @abstractmethod
-    def alter(self, seconds: float, list_index: int, pixel_index: int, pixels, pixel_color) -> Tuple[int, int, int]:
+    def alter(self, seconds: float, list_index: int, pixel_index: int, pixels,
+              pixel_color: Optional) -> Optional[Tuple[int, int, int]]:
         pass
 
     def apply(self, seconds: float, pixels_list: list):
         pixels_list_copy = copy_pixels_list(pixels_list)
-        self.setting.apply(seconds, pixels_list_copy)
+        if self.setting is not None:
+            self.setting.apply(seconds, pixels_list_copy)
         for list_index, (pixels, pixels_copy) in enumerate(zip(pixels_list, pixels_list_copy)):
             for i in range(len(pixels)):
                 copied = pixels_copy[i]
@@ -42,7 +44,8 @@ class DimSetting(AlterPixelSetting):
         self.dim = dim
         self.pixel_range = pixel_range
 
-    def alter(self, seconds: float, list_index: int, pixel_index: int, pixels, pixel_color) -> Tuple[int, int, int]:
+    def alter(self, seconds: float, list_index: int, pixel_index: int, pixels,
+              pixel_color: Optional) -> Optional[Tuple[int, int, int]]:
         dim_setting = 1
         if self.pixel_range is None or self.pixel_range[0] <= pixel_index <= self.pixel_range[1]:
             dim_setting = self.dim
@@ -53,7 +56,10 @@ class FrontDimSetting(AlterPixelSetting):
     def __init__(self, setting: LedSetting):
         super().__init__(setting)
 
-    def alter(self, seconds: float, list_index: int, pixel_index: int, pixels, pixel_color) -> Tuple[int, int, int]:
+    def alter(self, seconds: float, list_index: int, pixel_index: int, pixels,
+              pixel_color: Optional) -> Optional[Tuple[int, int, int]]:
+        if pixel_color is None:
+            return None
         dim_amount = 1
         if pixel_index < 50:
             dim_amount *= pixel_index / 50

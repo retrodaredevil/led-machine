@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 
 from led_machine.block import BlockSetting
-from led_machine.percent import ReversingPercentGetter
+from led_machine.percent import ReversingPercentGetter, BouncePercentGetter, MultiplierPercentGetter
 from led_machine.rainbow import RainbowSetting
 from led_machine.settings import DimSetting, FrontDimSetting, SolidSetting, LedSettingHolder
 from led_machine.slack import SlackHelper
@@ -39,7 +39,7 @@ def main():
     slack_helper = SlackHelper(slack_token, slack_channel)
 
     default_percent_getter = ReversingPercentGetter(2.0, 10.0 * 60, 2.0)
-    quick_default_percent_getter = ReversingPercentGetter(1.0, 10.0 * 60, 2.0)
+    quick_bounce_percent_getter = BouncePercentGetter(2.0)
     slow_default_percent_getter = ReversingPercentGetter(4.0, 10.0 * 60, 4.0)
     rainbow_setting = RainbowSetting(default_percent_getter, 50)
     long_rainbow_setting = RainbowSetting(default_percent_getter, 300)
@@ -84,6 +84,12 @@ def main():
                 main_setting_holder.setting = solid_rainbow_setting
             elif "rainbow" in text:
                 main_setting_holder.setting = rainbow_setting
+            elif "bpr" in text:
+                main_setting_holder.setting = BlockSetting(
+                    None,
+                    [((0, 0, 255), 2), ((255, 0, 255), 4), ((255, 0, 0), 2)],
+                    slow_default_percent_getter
+                )
 
             if "skyline" in text or "sky line" in text or "sky-line" in text:
                 dim_setting = 0.005
@@ -113,6 +119,10 @@ def main():
             elif "single" in text:
                 pattern_setting_holder.setting = BlockSetting(main_setting_holder, [(None, 5), ((0, 0, 0), 295)],
                                                               slow_default_percent_getter)
+            elif "bounce" in text:
+                pattern_setting_holder.setting = BlockSetting(main_setting_holder, [(None, 5), ((0, 0, 0), 295)],
+                                                              MultiplierPercentGetter(quick_bounce_percent_getter,
+                                                                                      295 / 300))
         seconds = time.time()
         if is_on():
             if on_start is None:

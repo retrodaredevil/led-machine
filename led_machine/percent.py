@@ -68,3 +68,14 @@ class PercentGetterHolder(PercentGetter):
 
     def get_percent(self, seconds: float) -> float:
         return self.percent_getter.get_percent(seconds)
+
+
+class BouncePercentGetter(PercentGetter):
+    def __init__(self, total_period: float):
+        self.total_period = total_period
+
+    def get_percent(self, seconds: float) -> float:
+        spot = seconds % self.total_period
+        if spot > self.total_period / 2:
+            spot = self.total_period - spot
+        return spot / self.total_period
