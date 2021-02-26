@@ -39,7 +39,7 @@ def main():
     slack_helper = SlackHelper(slack_token, slack_channel)
 
     default_percent_getter = ReversingPercentGetter(2.0, 10.0 * 60, 2.0)
-    quick_bounce_percent_getter = BouncePercentGetter(2.0)
+    quick_bounce_percent_getter = BouncePercentGetter(6.0)
     slow_default_percent_getter = ReversingPercentGetter(4.0, 10.0 * 60, 4.0)
     rainbow_setting = RainbowSetting(default_percent_getter, 50)
     long_rainbow_setting = RainbowSetting(default_percent_getter, 300)
@@ -87,8 +87,8 @@ def main():
             elif "bpr" in text:
                 main_setting_holder.setting = BlockSetting(
                     None,
-                    [((0, 0, 255), 2), ((255, 0, 255), 4), ((255, 0, 0), 2)],
-                    slow_default_percent_getter
+                    [((0, 0, 255), 2), ((255, 0, 70), 4), ((255, 0, 0), 2)],
+                    default_percent_getter
                 )
 
             if "skyline" in text or "sky line" in text or "sky-line" in text:
