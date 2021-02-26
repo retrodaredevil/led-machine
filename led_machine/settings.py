@@ -10,12 +10,20 @@ class LedSetting(ABC):
         pass
 
 
+class LedSettingHolder(LedSetting):
+    def __init__(self, setting: LedSetting):
+        self.setting: LedSetting = setting
+
+    def apply(self, seconds: float, pixels_list: list):
+        self.setting.apply(seconds, pixels_list)
+
+
 class AlterPixelSetting(LedSetting, ABC):
     def __init__(self, setting: LedSetting):
         self.setting = setting
 
     @abstractmethod
-    def alter(self, list_index: int, pixel_index: int, pixels, pixel_color) -> Tuple[int, int, int]:
+    def alter(self, seconds: float, list_index: int, pixel_index: int, pixels, pixel_color) -> Tuple[int, int, int]:
         pass
 
     def apply(self, seconds: float, pixels_list: list):
@@ -25,7 +33,7 @@ class AlterPixelSetting(LedSetting, ABC):
             for i in range(len(pixels)):
                 copied = pixels_copy[i]
                 if copied is not None:
-                    pixels[i] = self.alter(list_index, i, pixels, copied)
+                    pixels[i] = self.alter(seconds, list_index, i, pixels, copied)
 
 
 class DimSetting(AlterPixelSetting):
@@ -34,7 +42,7 @@ class DimSetting(AlterPixelSetting):
         self.dim = dim
         self.pixel_range = pixel_range
 
-    def alter(self, list_index: int, pixel_index: int, pixels, pixel_color) -> Tuple[int, int, int]:
+    def alter(self, seconds: float, list_index: int, pixel_index: int, pixels, pixel_color) -> Tuple[int, int, int]:
         dim_setting = 1
         if self.pixel_range is None or self.pixel_range[0] <= pixel_index <= self.pixel_range[1]:
             dim_setting = self.dim
@@ -45,7 +53,7 @@ class FrontDimSetting(AlterPixelSetting):
     def __init__(self, setting: LedSetting):
         super().__init__(setting)
 
-    def alter(self, list_index: int, pixel_index: int, pixels, pixel_color) -> Tuple[int, int, int]:
+    def alter(self, seconds: float, list_index: int, pixel_index: int, pixels, pixel_color) -> Tuple[int, int, int]:
         dim_amount = 1
         if pixel_index < 50:
             dim_amount *= pixel_index / 50

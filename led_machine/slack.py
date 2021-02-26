@@ -28,6 +28,8 @@ class SlackHelper:
             self.last_request = seconds
             if self.last_cancel is not None and self.last_cancel + 3.0 > seconds:  # We've cancelled recently, so give it some time
                 return
+            # This has tier 3 applied to it: https://api.slack.com/docs/rate-limits
+            # https://api.slack.com/methods/conversations.history
             self.future = self.client.conversations_history(channel=self.channel, oldest=seconds - 120.0, limit=10)
 
             # Yeah, I totally copied some of this: https://stackoverflow.com/a/325528/5434860
@@ -39,6 +41,7 @@ class SlackHelper:
             import threading
             thread = threading.Thread(target=loop_in_thread, args=(event_loop,))
             thread.start()
+            thread.join()
 
             if self.last_message_time is None:
                 self.last_message_time = seconds

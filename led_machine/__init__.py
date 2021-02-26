@@ -2,9 +2,10 @@ import time
 import json
 from pathlib import Path
 
-
+from led_machine.block import BlockSetting
+from led_machine.percent import ReversingPercentGetter
 from led_machine.rainbow import RainbowSetting
-from led_machine.settings import DimSetting, FrontDimSetting, SolidSetting
+from led_machine.settings import DimSetting, FrontDimSetting, SolidSetting, LedSettingHolder
 from led_machine.slack import SlackHelper
 
 DIM = 1.0
@@ -37,8 +38,15 @@ def main():
     slack_channel = config["slack_channel"]
     slack_helper = SlackHelper(slack_token, slack_channel)
 
-    main_setting_holder = FrontDimSetting(RainbowSetting())
-    rear_dimmer = DimSetting(main_setting_holder, 1, (300 - 47, 300))
+    default_percent_getter = ReversingPercentGetter(2.0, 10.0 * 60, 2.0)
+    quick_default_percent_getter = ReversingPercentGetter(1.0, 10.0 * 60, 2.0)
+    rainbow_setting = RainbowSetting(default_percent_getter, 50)
+    long_rainbow_setting = RainbowSetting(default_percent_getter, 300)
+    solid_rainbow_setting = RainbowSetting(ReversingPercentGetter(6.0, 10.0 * 60, 6.0), 30000000000)
+
+    main_setting_holder = LedSettingHolder(rainbow_setting)
+    pattern_setting_holder = LedSettingHolder(main_setting_holder)
+    rear_dimmer = DimSetting(FrontDimSetting(pattern_setting_holder), 1, (300 - 47, 300))
     setting = DimSetting(rear_dimmer, DIM)
     dim_setting = 0.8
     while True:
@@ -69,8 +77,12 @@ def main():
                 main_setting_holder.setting = SolidSetting((255, 255, 255))
             elif "off" in text:
                 main_setting_holder.setting = SolidSetting((0, 0, 0))
+            elif "long" in text and "rainbow" in text:
+                main_setting_holder.setting = long_rainbow_setting
+            elif "solid" in text and "rainbow" in text:
+                main_setting_holder.setting = solid_rainbow_setting
             elif "rainbow" in text:
-                main_setting_holder.setting = RainbowSetting()
+                main_setting_holder.setting = rainbow_setting
 
             if "skyline" in text or "sky line" in text or "sky-line" in text:
                 dim_setting = 0.005
@@ -91,6 +103,15 @@ def main():
                     unknown = True
                 if not unknown:
                     rear_dimmer.dim = 1.0
+
+            if "reset" in text:
+                pattern_setting_holder.setting = main_setting_holder
+            elif "carnival" in text:
+                pattern_setting_holder.setting = BlockSetting(main_setting_holder, [(None, 5), ((0, 0, 0), 3)],
+                                                              quick_default_percent_getter)
+            elif "single" in text:
+                pattern_setting_holder.setting = BlockSetting(main_setting_holder, [(None, 5), ((0, 0, 0), 295)],
+                                                              quick_default_percent_getter)
         seconds = time.time()
         if is_on():
             if on_start is None:
