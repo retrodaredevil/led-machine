@@ -11,6 +11,6 @@ setup(
     entry_points={"console_scripts": ["led-machine = led_machine:main",
                                       ]},
     install_requires=["adafruit-circuitpython-neopixel",
-                      "slack_sdk",
+                      "slackclient",
                       ]
 )
