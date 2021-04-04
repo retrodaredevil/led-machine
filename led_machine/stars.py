@@ -63,4 +63,4 @@ class StarSetting(AlterPixelSetting):
             elif upper < pixel_index <= upper + star.fade_distance:
                 brightness = max(brightness, 1 - (pixel_index - upper) / star.fade_distance)
 
-        return pixel_color[0] * brightness, pixel_color[1] * brightness, pixel_color[2] * brightness
+        return int(pixel_color[0] * brightness), int(pixel_color[1] * brightness), int(pixel_color[2] * brightness)
