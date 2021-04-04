@@ -12,7 +12,12 @@ sudo pip3 install rpi_ws281x adafruit-circuitpython-neopixel
 
 https://pinout.xyz
 
-Slack permissions needed:
+### Slack
+This uses Slack's [event api](https://api.slack.com/apis/connections/events-api#subscriptions) and uses Socket mode.
+
+You must enable Socket mode then enable Events
+
+Slack bot events to sub to:
 ```
-channels:history,groups:history,mpim:history,im:history
+message.channels
 ```

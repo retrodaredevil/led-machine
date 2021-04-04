@@ -43,7 +43,7 @@ def main():
     with Path("config.json").open() as file:
         config = json.load(file)
 
-    slack_bot_token = config["slack_bot_token"]
+    slack_bot_token = config["slack_bot_token"]  # xoxb-***
     slack_app_token = config["slack_app_token"]  # xapp-***
     slack_channel = config["slack_channel"]
     slack_helper = SlackHelper(slack_bot_token, slack_app_token, slack_channel)

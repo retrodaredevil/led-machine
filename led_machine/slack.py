@@ -18,6 +18,7 @@ class SlackHelper:
             app_token=self.app_token,
             web_client=WebClient(token=self.bot_token)
         )
+        self.client.socket_mode_request_listeners.append(lambda client, req: self._process_event(client, req))
         self.client.connect()
 
     def __del__(self):
