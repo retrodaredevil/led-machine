@@ -4,7 +4,7 @@ from typing import Optional, Tuple, List
 from led_machine.settings import LedSetting, AlterPixelSetting
 
 MAX_DELTA = 0.3
-STAR_PER_PIXEL = 1 / 9
+STAR_PER_PIXEL = 1 / 12
 
 
 class Star:
@@ -13,8 +13,8 @@ class Star:
         self.velocity: float = 0.0
         self.brightness: float = 1.0
         self.thickness: float = 0.0
-        self.fade_distance_left: float = 1.0
-        self.fade_distance_right: float = 1.0
+        self.fade_distance_left: float = 1.5
+        self.fade_distance_right: float = 1.5
         self.brightness_left: float = 0.9
         self.brightness_right: float = 0.9
 
@@ -34,8 +34,8 @@ class StarSetting(AlterPixelSetting):
             star = Star()
             self.stars.append(star)
             star.position = randint(self.spawn_lower, self.spawn_upper)
-            star.velocity = (randint(0, 1) * 2 - 1) * uniform(1.0, 5.0)
-            star.brightness = uniform(0.5, 1.0)
+            star.velocity = (randint(0, 1) * 2 - 1) * uniform(0.4, 2.0)
+            star.brightness = uniform(0.2, 0.8)
             star.brightness_left = star.brightness
             star.brightness_right = star.brightness
 
@@ -43,9 +43,9 @@ class StarSetting(AlterPixelSetting):
         self.stars.append(shooting_star)
         shooting_star.thickness = 1.0
         shooting_star.fade_distance_right = 4.0
-        shooting_star.fade_distance_left = 2.0
+        shooting_star.fade_distance_left = 1.0
         shooting_star.brightness_right = 0.1
-        shooting_star.velocity = -25.0
+        shooting_star.velocity = -10.0
 
     def apply(self, seconds: float, pixels_list: list):
         delta = 0.0
