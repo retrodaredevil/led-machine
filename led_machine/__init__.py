@@ -43,9 +43,10 @@ def main():
     with Path("config.json").open() as file:
         config = json.load(file)
 
-    slack_token = config["slack_token"]
+    slack_bot_token = config["slack_bot_token"]
+    slack_app_token = config["slack_app_token"]  # xapp-***
     slack_channel = config["slack_channel"]
-    slack_helper = SlackHelper(slack_token, slack_channel)
+    slack_helper = SlackHelper(slack_bot_token, slack_app_token, slack_channel)
 
     color_time_multiplier = 1.0
     color_time_multiplier_getter = lambda: color_time_multiplier
@@ -71,7 +72,6 @@ def main():
     setting = DimSetting(rear_dimmer, DIM)
     dim_setting = 0.8
     while True:
-        slack_helper.update()
         for message in slack_helper.new_messages():
             text: str = message["text"].lower()
             reset = False

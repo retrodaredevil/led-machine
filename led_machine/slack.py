@@ -1,71 +1,47 @@
-import asyncio
-import time
-from asyncio import Future
-from typing import Optional
+from queue import Queue
 
-from slack import WebClient
-from slack.web.slack_response import SlackResponse
+from slack_sdk import WebClient
+from slack_sdk.socket_mode import SocketModeClient
+# https://slack.dev/python-slack-sdk/socket-mode/index.html
+from slack_sdk.socket_mode.request import SocketModeRequest
+from slack_sdk.socket_mode.response import SocketModeResponse
 
 
 class SlackHelper:
-    def __init__(self, token, channel):
+    def __init__(self, bot_token, app_token, channel):
+        self.bot_token = bot_token
+        self.app_token = app_token
         self.channel = channel
-        self.client = WebClient(token=token, run_async=True)
-        self.future: Optional[Future] = None
-        self.last_message_time: Optional[float] = None
-        self.last_request: Optional[float] = None
-        self.last_cancel = None
+        self.message_queue = Queue()
 
-    def update(self):
-        seconds = time.time()
-        if (self.last_request is None or (self.last_request + 2.5 < seconds
-                                          and self.future is not None and self.future.done())
-                or self.last_request + 7.0 < seconds):
-            if self.future is not None:
-                self.future.cancel()
-                self.future = None
-                self.last_cancel = seconds
-            self.last_request = seconds
-            if self.last_cancel is not None and self.last_cancel + 3.0 > seconds:  # We've cancelled recently, so give it some time
-                return
-            # This has tier 3 applied to it: https://api.slack.com/docs/rate-limits
-            # https://api.slack.com/methods/conversations.history
-            self.future = self.client.conversations_history(channel=self.channel, oldest=seconds - 120.0, limit=10)
+        self.client = SocketModeClient(
+            app_token=self.app_token,
+            web_client=WebClient(token=self.bot_token)
+        )
+        self.client.connect()
 
-            # Yeah, I totally copied some of this: https://stackoverflow.com/a/325528/5434860
-            def loop_in_thread(loop):
-                asyncio.set_event_loop(loop)
-                loop.run_until_complete(self.future)
+    def __del__(self):
+        self.client.close()
 
-            event_loop = asyncio.get_event_loop()
-            import threading
-            thread = threading.Thread(target=loop_in_thread, args=(event_loop,))
-            thread.start()
+    def _process_event(self, client: SocketModeClient, req: SocketModeRequest):
+        if req.type == "events_api":
+            # Acknowledge the request anyway
+            response = SocketModeResponse(envelope_id=req.envelope_id)
+            client.send_socket_mode_response(response)
 
-            if self.last_message_time is None:
-                self.last_message_time = seconds
+            # Add a reaction to the message if it's a new message
+            message = req.payload["event"]
+            if message["type"] == "message" and message.get("subtype") is None:
+                self.message_queue.put(message)
+                client.web_client.reactions_add(
+                    name="eyes",
+                    channel=message["channel"],
+                    timestamp=message["ts"],
+                )
 
     def new_messages(self) -> list:
-        if self.future is not None:
-            if self.future.done():
-                result: SlackResponse = self.future.result()
-                self.future = None
-                messages = list(result["messages"])  # get messages and copy it
-
-                if self.last_message_time:
-                    for i in range(len(messages) - 1, -1, -1):
-                        message = messages[i]
-                        timestamp = float(message["ts"])
-                        if timestamp <= self.last_message_time:
-                            messages.pop(i)
-
-                if messages:
-                    return_nothing = self.last_message_time is None
-                    self.last_message_time = float(messages[0]["ts"])
-                    if return_nothing:
-                        return []
-
-                return messages
-
-        return []
+        messages = []
+        while not self.message_queue.empty():
+            messages.append(self.message_queue.get())
+        return messages
 
