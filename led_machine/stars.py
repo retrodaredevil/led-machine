@@ -11,10 +11,12 @@ class Star:
     def __init__(self):
         self.position: float = 0.0
         self.velocity: float = 0.0
-        self.brightness: float = 0.0
+        self.brightness: float = 1.0
         self.thickness: float = 0.0
         self.fade_distance_left: float = 1.0
         self.fade_distance_right: float = 1.0
+        self.brightness_left: float = 0.9
+        self.brightness_right: float = 0.9
 
 
 class StarSetting(AlterPixelSetting):
@@ -33,10 +35,16 @@ class StarSetting(AlterPixelSetting):
             self.stars.append(star)
             star.position = randint(self.spawn_lower, self.spawn_upper)
             star.velocity = (randint(0, 1) * 2 - 1) * uniform(1.0, 5.0)
+            star.brightness = uniform(0.5, 1.0)
+            star.brightness_left = star.brightness
+            star.brightness_right = star.brightness
 
         shooting_star = Star()
         self.stars.append(shooting_star)
-        shooting_star.fade_distance_right = 3.0
+        shooting_star.thickness = 1.0
+        shooting_star.fade_distance_right = 10.0
+        shooting_star.fade_distance_left = 2.0
+        shooting_star.brightness_right = 0.5
         shooting_star.velocity = -15.0
 
     def apply(self, seconds: float, pixels_list: list):
@@ -64,9 +72,9 @@ class StarSetting(AlterPixelSetting):
             if lower <= pixel_index <= upper:
                 brightness = max(brightness, star.brightness)
             elif lower - star.fade_distance_left <= pixel_index < lower:  # 3.5 to 4
-                brightness = max(brightness, (pixel_index - (lower - star.fade_distance_left)) / star.fade_distance_left)
+                brightness = max(brightness, (pixel_index - (lower - star.fade_distance_left)) / star.fade_distance_left * star.brightness_left)
             elif upper < pixel_index <= upper + star.fade_distance_right:
-                brightness = max(brightness, ((upper + star.fade_distance_right) - pixel_index) / star.fade_distance_right)
+                brightness = max(brightness, ((upper + star.fade_distance_right) - pixel_index) / star.fade_distance_right * star.brightness_right)
 
         assert 0.0 <= brightness <= 1.0, f"Brightness is {brightness}"
         return int(pixel_color[0] * brightness), int(pixel_color[1] * brightness), int(pixel_color[2] * brightness)
