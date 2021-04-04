@@ -16,6 +16,15 @@ class SlackHelper:
         self.last_request: Optional[float] = None
         self.last_cancel = None
 
+        # Yeah, I totally copied some of this: https://stackoverflow.com/a/325528/5434860
+        def loop_in_thread(loop):
+            asyncio.set_event_loop(loop)
+            loop.run_until_complete(self.future)
+
+        event_loop = asyncio.get_event_loop()
+        import threading
+        self.thread = threading.Thread(target=loop_in_thread, args=(event_loop,))
+
     def update(self):
         seconds = time.time()
         if (self.last_request is None or (self.last_request + 2.5 < seconds
@@ -25,22 +34,16 @@ class SlackHelper:
                 self.future.cancel()
                 self.future = None
                 self.last_cancel = seconds
+                self.thread.join(0.1)
+                if self.thread.is_alive():
+                    raise Exception("We cancelled the future and yet the thread is still alive!")
             self.last_request = seconds
             if self.last_cancel is not None and self.last_cancel + 3.0 > seconds:  # We've cancelled recently, so give it some time
                 return
             # This has tier 3 applied to it: https://api.slack.com/docs/rate-limits
             # https://api.slack.com/methods/conversations.history
-            self.future = self.client.conversations_history(channel=self.channel, oldest=seconds - 120.0, limit=10)
-
-            # Yeah, I totally copied some of this: https://stackoverflow.com/a/325528/5434860
-            def loop_in_thread(loop):
-                asyncio.set_event_loop(loop)
-                loop.run_until_complete(self.future)
-
-            event_loop = asyncio.get_event_loop()
-            import threading
-            thread = threading.Thread(target=loop_in_thread, args=(event_loop,))
-            thread.start()
+            self.future = self.client.conversations_history(channel=self.channel, oldest=seconds - 300.0, limit=10)
+            self.thread.start()
 
             if self.last_message_time is None:
                 self.last_message_time = seconds
@@ -50,7 +53,8 @@ class SlackHelper:
             if self.future.done():
                 result: SlackResponse = self.future.result()
                 self.future = None
-                messages = list(result["messages"])  # get messages and copy it
+                messages = result["messages"][::-1]  # get messages and copy+reverse it
+                # After reversal, oldest messages are first
 
                 if self.last_message_time:
                     for i in range(len(messages) - 1, -1, -1):
@@ -61,7 +65,7 @@ class SlackHelper:
 
                 if messages:
                     return_nothing = self.last_message_time is None
-                    self.last_message_time = float(messages[0]["ts"])
+                    self.last_message_time = float(messages[-1]["ts"])
                     if return_nothing:
                         return []
 
