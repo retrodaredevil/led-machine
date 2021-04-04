@@ -1,0 +1,10 @@
+[Unit]
+Description=Service for LED Machine
+
+[Service]
+TimeoutStartSec=1
+ExecStart=/home/pi/led-machine/run.sh
+#StandardOutput=null
+
+[Install]
+WantedBy=multi-user.target

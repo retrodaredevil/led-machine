@@ -2,6 +2,9 @@
 .idea/
 config.json
 
+.*.swp
+*.bak
+
 
 # Created by https://www.toptal.com/developers/gitignore/api/python,linux,macos,windows,intellij
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,linux,macos,windows,intellij

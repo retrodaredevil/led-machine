@@ -14,15 +14,15 @@ class SlackHelper:
         self.channel = channel
         self.message_queue = Queue()
 
-        self.client = SocketModeClient(
+        self.socket_client = SocketModeClient(
             app_token=self.app_token,
             web_client=WebClient(token=self.bot_token)
         )
-        self.client.socket_mode_request_listeners.append(lambda client, req: self._process_event(client, req))
-        self.client.connect()
+        self.socket_client.socket_mode_request_listeners.append(lambda client, req: self._process_event(client, req))
+        self.socket_client.connect()
 
     def __del__(self):
-        self.client.close()
+        self.socket_client.close()
 
     def _process_event(self, client: SocketModeClient, req: SocketModeRequest):
         if req.type == "events_api":
@@ -34,11 +34,12 @@ class SlackHelper:
             message = req.payload["event"]
             if message["type"] == "message" and message.get("subtype") is None:
                 self.message_queue.put(message)
-                client.web_client.reactions_add(
-                    name="eyes",
-                    channel=message["channel"],
-                    timestamp=message["ts"],
-                )
+                # This doesn't work for some reason
+                # print(client.web_client.reactions_add(
+                #     name="eyes",
+                #     channel=message["channel"],
+                #     timestamp=message["ts"],
+                # ))
 
     def new_messages(self) -> list:
         messages = []

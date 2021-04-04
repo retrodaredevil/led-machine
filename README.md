@@ -21,3 +21,11 @@ Slack bot events to sub to:
 ```
 message.channels
 ```
+
+Scopes to have:
+```
+reactions:write
+```
+
+## Install systmed service
+Copy `led-machine.service` to `/etc/systemd/system/`
