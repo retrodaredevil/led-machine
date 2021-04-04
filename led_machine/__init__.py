@@ -9,6 +9,7 @@ from led_machine.percent import ReversingPercentGetter, BouncePercentGetter, Mul
 from led_machine.rainbow import RainbowSetting
 from led_machine.settings import DimSetting, FrontDimSetting, SolidSetting, LedSettingHolder
 from led_machine.slack import SlackHelper
+from led_machine.stars import StarSetting
 
 DIM = 1.0
 
@@ -155,6 +156,9 @@ def main():
                         pattern_time_multiplier_getter
                     )
                 )
+            elif "star" in text:
+                indicates_pattern = True
+                pattern_setting_holder.setting = StarSetting(main_setting_holder, 300, 300)
 
             if indicates_pattern or "pattern" in text:
                 # Pattern speed
