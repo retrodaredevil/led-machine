@@ -42,10 +42,10 @@ class StarSetting(AlterPixelSetting):
         shooting_star = Star()
         self.stars.append(shooting_star)
         shooting_star.thickness = 1.0
-        shooting_star.fade_distance_right = 10.0
+        shooting_star.fade_distance_right = 4.0
         shooting_star.fade_distance_left = 2.0
-        shooting_star.brightness_right = 0.5
-        shooting_star.velocity = -15.0
+        shooting_star.brightness_right = 0.1
+        shooting_star.velocity = -25.0
 
     def apply(self, seconds: float, pixels_list: list):
         delta = 0.0
