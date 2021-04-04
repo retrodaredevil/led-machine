@@ -1,11 +1,10 @@
-from random import random, randint, uniform
+from random import randint, uniform
 from typing import Optional, Tuple, List
 
 from led_machine.settings import LedSetting, AlterPixelSetting
 
-
 MAX_DELTA = 0.3
-STAR_PER_PIXEL = 1 / 15
+STAR_PER_PIXEL = 1 / 9
 
 
 class Star:
@@ -14,7 +13,8 @@ class Star:
         self.velocity: float = 0.0
         self.brightness: float = 0.0
         self.thickness: float = 0.0
-        self.fade_distance: float = 0.5
+        self.fade_distance_left: float = 1.0
+        self.fade_distance_right: float = 1.0
 
 
 class StarSetting(AlterPixelSetting):
@@ -33,6 +33,11 @@ class StarSetting(AlterPixelSetting):
             self.stars.append(star)
             star.position = randint(self.spawn_lower, self.spawn_upper)
             star.velocity = (randint(0, 1) * 2 - 1) * uniform(1.0, 5.0)
+
+        shooting_star = Star()
+        self.stars.append(shooting_star)
+        shooting_star.fade_distance_right = 3.0
+        shooting_star.velocity = -15.0
 
     def apply(self, seconds: float, pixels_list: list):
         delta = 0.0
@@ -58,10 +63,10 @@ class StarSetting(AlterPixelSetting):
             upper = star.position - star.thickness / 2
             if lower <= pixel_index <= upper:
                 brightness = max(brightness, star.brightness)
-            elif lower - star.fade_distance <= pixel_index < lower:
-                brightness = max(brightness, 1 - (lower - pixel_index) / star.fade_distance)
-            elif upper < pixel_index <= upper + star.fade_distance:
-                brightness = max(brightness, 1 - (pixel_index - upper) / star.fade_distance)
+            elif lower - star.fade_distance_left <= pixel_index < lower:  # 3.5 to 4
+                brightness = max(brightness, (pixel_index - (lower - star.fade_distance_left)) / star.fade_distance_left)
+            elif upper < pixel_index <= upper + star.fade_distance_right:
+                brightness = max(brightness, ((upper + star.fade_distance_right) - pixel_index) / star.fade_distance_right)
 
         assert 0.0 <= brightness <= 1.0, f"Brightness is {brightness}"
         return int(pixel_color[0] * brightness), int(pixel_color[1] * brightness), int(pixel_color[2] * brightness)
