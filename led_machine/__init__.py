@@ -1,35 +1,44 @@
 import time
 import json
 from pathlib import Path
+from typing import Optional
 
 from led_machine.block import BlockSetting
-from led_machine.percent import ReversingPercentGetter, BouncePercentGetter, MultiplierPercentGetter
+from led_machine.percent import ReversingPercentGetter, BouncePercentGetter, MultiplierPercentGetter, \
+    PercentGetterHolder, PercentGetterTimeMultiplier
 from led_machine.rainbow import RainbowSetting
 from led_machine.settings import DimSetting, FrontDimSetting, SolidSetting, LedSettingHolder
 from led_machine.slack import SlackHelper
 
 DIM = 1.0
+
+
 # DIM = 0.8 * 0.01  # good for really dim
 # DIM = 0.8 * 0.12  # good for movie
 
 
+def get_time_multiplier(text) -> Optional[float]:
+    if "sonic" in text:
+        return 2.0
+    elif "fast" in text:
+        return 1.5
+    elif "medium" in text:
+        return 1.0
+    elif "slow" in text:
+        return 0.5
+    elif "crawl" in text:
+        return 0.25
+    return None
+
+
 def main():
-    import RPi.GPIO as GPIO
     import board
     import neopixel
-    # GPIO.setwarnings(False)
-    GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
-    def is_on():
-        return GPIO.input(23) == GPIO.LOW
 
     pixels_list = [
         neopixel.NeoPixel(board.D18, 300),  # AKA GPIO 18
     ]
     pixels_list[0].auto_write = False
-
-    on_start = None
-    off_start = None
 
     with Path("config.json").open() as file:
         config = json.load(file)
@@ -38,12 +47,23 @@ def main():
     slack_channel = config["slack_channel"]
     slack_helper = SlackHelper(slack_token, slack_channel)
 
+    color_time_multiplier = 1.0
+    color_time_multiplier_getter = lambda: color_time_multiplier
+    pattern_time_multiplier = 1.0
+    pattern_time_multiplier_getter = lambda: pattern_time_multiplier
+
     default_percent_getter = ReversingPercentGetter(2.0, 10.0 * 60, 2.0)
-    quick_bounce_percent_getter = BouncePercentGetter(6.0)
+    quick_bounce_percent_getter = BouncePercentGetter(12.0)
     slow_default_percent_getter = ReversingPercentGetter(4.0, 10.0 * 60, 4.0)
-    rainbow_setting = RainbowSetting(default_percent_getter, 50)
-    long_rainbow_setting = RainbowSetting(default_percent_getter, 300)
-    solid_rainbow_setting = RainbowSetting(ReversingPercentGetter(6.0, 10.0 * 60, 6.0), 30000000000)
+
+    rainbow_setting = RainbowSetting(PercentGetterTimeMultiplier(default_percent_getter, color_time_multiplier_getter), 50)
+    long_rainbow_setting = RainbowSetting(PercentGetterTimeMultiplier(default_percent_getter, color_time_multiplier_getter), 300)
+    solid_rainbow_setting = RainbowSetting(PercentGetterTimeMultiplier(ReversingPercentGetter(10.0, 15.0 * 60, 10.0), color_time_multiplier_getter), 30000000000)
+    bpr_setting = BlockSetting(
+        None,
+        [((0, 0, 255), 2), ((255, 0, 70), 4), ((255, 0, 0), 2)],
+        PercentGetterTimeMultiplier(default_percent_getter, color_time_multiplier_getter)
+    )
 
     main_setting_holder = LedSettingHolder(rainbow_setting)
     pattern_setting_holder = LedSettingHolder(main_setting_holder)
@@ -54,6 +74,7 @@ def main():
         slack_helper.update()
         for message in slack_helper.new_messages():
             text: str = message["text"].lower()
+            reset = False
             if "brown" in text or ("shallow" in text and "purple" in text):
                 main_setting_holder.setting = SolidSetting((165, 42, 23))
             elif "purple" in text and "deep" in text:
@@ -78,6 +99,7 @@ def main():
                 main_setting_holder.setting = SolidSetting((255, 255, 255))
             elif "off" in text:
                 main_setting_holder.setting = SolidSetting((0, 0, 0))
+                reset = True
             elif "long" in text and "rainbow" in text:
                 main_setting_holder.setting = long_rainbow_setting
             elif "solid" in text and "rainbow" in text:
@@ -85,11 +107,7 @@ def main():
             elif "rainbow" in text:
                 main_setting_holder.setting = rainbow_setting
             elif "bpr" in text:
-                main_setting_holder.setting = BlockSetting(
-                    None,
-                    [((0, 0, 255), 2), ((255, 0, 70), 4), ((255, 0, 0), 2)],
-                    default_percent_getter
-                )
+                main_setting_holder.setting = bpr_setting
 
             if "skyline" in text or "sky line" in text or "sky-line" in text:
                 dim_setting = 0.005
@@ -111,35 +129,46 @@ def main():
                 if not unknown:
                     rear_dimmer.dim = 1.0
 
-            if "reset" in text:
+            indicates_pattern = False
+            if reset or "reset" in text:
                 pattern_setting_holder.setting = main_setting_holder
+                color_time_multiplier = 1.0
+                pattern_time_multiplier = 1.0
             elif "carnival" in text:
-                pattern_setting_holder.setting = BlockSetting(main_setting_holder, [(None, 5), ((0, 0, 0), 3)],
-                                                              slow_default_percent_getter)
+                indicates_pattern = True
+                pattern_setting_holder.setting = BlockSetting(
+                    main_setting_holder, [(None, 5), ((0, 0, 0), 3)],
+                    PercentGetterTimeMultiplier(slow_default_percent_getter, pattern_time_multiplier_getter)
+                )
             elif "single" in text:
-                pattern_setting_holder.setting = BlockSetting(main_setting_holder, [(None, 5), ((0, 0, 0), 295)],
-                                                              slow_default_percent_getter)
+                indicates_pattern = True
+                pattern_setting_holder.setting = BlockSetting(
+                    main_setting_holder, [(None, 5), ((0, 0, 0), 295)],
+                    PercentGetterTimeMultiplier(slow_default_percent_getter, pattern_time_multiplier_getter)
+                )
             elif "bounce" in text:
-                pattern_setting_holder.setting = BlockSetting(main_setting_holder, [(None, 5), ((0, 0, 0), 295)],
-                                                              MultiplierPercentGetter(quick_bounce_percent_getter,
-                                                                                      295 / 300))
+                indicates_pattern = True
+                pattern_setting_holder.setting = BlockSetting(
+                    main_setting_holder, [(None, 5), ((0, 0, 0), 295)],
+                    PercentGetterTimeMultiplier(
+                        MultiplierPercentGetter(quick_bounce_percent_getter, 295 / 300),
+                        pattern_time_multiplier_getter
+                    )
+                )
+
+            if indicates_pattern or "pattern" in text:
+                # Pattern speed
+                time_multiplier = get_time_multiplier(text)
+                if time_multiplier is not None:
+                    pattern_time_multiplier = time_multiplier
+            else:
+                # Color speed
+                time_multiplier = get_time_multiplier(text)
+                if time_multiplier is not None:
+                    color_time_multiplier = time_multiplier
         seconds = time.time()
-        if is_on():
-            if on_start is None:
-                on_start = seconds
-            off_start = None
-        else:
-            if off_start is None:
-                off_start = seconds
-            on_start = None
 
-        on_off_dim = 1.0
-        if on_start is not None:
-            on_off_dim = min(1.0, seconds - on_start)
-        elif off_start is not None:
-            on_off_dim = max(0.0, 1.0 - seconds + off_start)
-
-        setting.dim = DIM * on_off_dim * dim_setting
+        setting.dim = DIM * dim_setting
         setting.apply(seconds, pixels_list)
         for pixels in pixels_list:
             pixels.show()

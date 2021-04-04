@@ -1,5 +1,5 @@
 from abc import abstractmethod, ABC
-from typing import List
+from typing import List, Callable
 
 
 class PercentGetter(ABC):
@@ -63,11 +63,21 @@ class MultiplierPercentGetter(PercentGetter):
 
 
 class PercentGetterHolder(PercentGetter):
-    def __init__(self, percent_getter: PercentGetter):
+    def __init__(self, percent_getter: PercentGetter, time_multiplier: float = 1.0):
         self.percent_getter: PercentGetter = percent_getter
+        self.time_multiplier: float = time_multiplier
 
     def get_percent(self, seconds: float) -> float:
-        return self.percent_getter.get_percent(seconds)
+        return self.percent_getter.get_percent(seconds * self.time_multiplier)
+
+
+class PercentGetterTimeMultiplier(PercentGetter):
+    def __init__(self, percent_getter: PercentGetter, time_multiplier_getter: Callable[[], float]):
+        self.percent_getter: PercentGetter = percent_getter
+        self.time_multiplier_getter: Callable = time_multiplier_getter
+
+    def get_percent(self, seconds: float) -> float:
+        return self.percent_getter.get_percent(seconds * self.time_multiplier_getter())
 
 
 class BouncePercentGetter(PercentGetter):
