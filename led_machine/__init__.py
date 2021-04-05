@@ -85,7 +85,7 @@ def main():
                     try:
                         r = int(word[0:2], 16)
                         g = int(word[2:4], 16)
-                        b = int(word[5:6], 16)
+                        b = int(word[4:6], 16)
                         main_setting_holder.setting = SolidSetting((r, g, b))
                     except ValueError:
                         print(f"Couldn't parse: {repr(word)}")
