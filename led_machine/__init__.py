@@ -75,8 +75,9 @@ def main():
     while True:
         for message in slack_helper.new_messages():
             text: str = message["text"].lower()
+            print(f"Got text: {repr(text)}")
             reset = False
-            if text.startswith("#") and len(text) >= 4:
+            if any(text.startswith(a) for a in ["#", "!", "?", "$", "%"]) and len(text) >= 4:
                 word = text.split(" ")[1:]
                 if len(word) == 3:
                     word = "".join(a * 2 for a in word)
@@ -105,7 +106,7 @@ def main():
             elif "orange" in text:
                 main_setting_holder.setting = SolidSetting((255, 45, 0))
             elif "yellow" in text:
-                main_setting_holder.setting = SolidSetting((255, 200, 0))
+                main_setting_holder.setting = SolidSetting((255, 170, 0))
             elif "teal" in text:
                 main_setting_holder.setting = SolidSetting((0, 255, 255))
             elif "white" in text:
