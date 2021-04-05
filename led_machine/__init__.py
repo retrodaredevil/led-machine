@@ -76,7 +76,19 @@ def main():
         for message in slack_helper.new_messages():
             text: str = message["text"].lower()
             reset = False
-            if "brown" in text or ("shallow" in text and "purple" in text):
+            if text.startswith("#") and len(text) >= 4:
+                word = text.split(" ")[1:]
+                if len(word) == 3:
+                    word = "".join(a * 2 for a in word)
+                if len(word) == 6:
+                    try:
+                        r = int(word[0:2], 16)
+                        g = int(word[2:4], 16)
+                        b = int(word[5:6], 16)
+                        main_setting_holder.setting = SolidSetting((r, g, b))
+                    except ValueError:
+                        print(f"Couldn't parse: {word}")
+            elif "brown" in text or ("shallow" in text and "purple" in text):
                 main_setting_holder.setting = SolidSetting((165, 42, 23))
             elif "purple" in text and "deep" in text:
                 main_setting_holder.setting = SolidSetting((255, 0, 70))
@@ -93,7 +105,7 @@ def main():
             elif "orange" in text:
                 main_setting_holder.setting = SolidSetting((255, 45, 0))
             elif "yellow" in text:
-                main_setting_holder.setting = SolidSetting((255, 255, 0))
+                main_setting_holder.setting = SolidSetting((255, 200, 0))
             elif "teal" in text:
                 main_setting_holder.setting = SolidSetting((0, 255, 255))
             elif "white" in text:
