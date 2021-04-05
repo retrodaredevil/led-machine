@@ -78,7 +78,7 @@ def main():
             print(f"Got text: {repr(text)}")
             reset = False
             if any(text.startswith(a) for a in ["#", "!", "?", "$", "%"]) and len(text) >= 4:
-                word = text.split(" ")[1:]
+                word = text.split(" ")[0][1:]
                 if len(word) == 3:
                     word = "".join(a * 2 for a in word)
                 if len(word) == 6:
@@ -88,7 +88,9 @@ def main():
                         b = int(word[5:6], 16)
                         main_setting_holder.setting = SolidSetting((r, g, b))
                     except ValueError:
-                        print(f"Couldn't parse: {word}")
+                        print(f"Couldn't parse: {repr(word)}")
+                else:
+                    print(f"Cannot parse word: {repr(word)}")
             elif "brown" in text or ("shallow" in text and "purple" in text):
                 main_setting_holder.setting = SolidSetting((165, 42, 23))
             elif "purple" in text and "deep" in text:
