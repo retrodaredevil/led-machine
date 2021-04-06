@@ -6,6 +6,7 @@ from typing import Optional
 from led_machine.block import BlockSetting
 from led_machine.percent import ReversingPercentGetter, BouncePercentGetter, MultiplierPercentGetter, \
     PercentGetterHolder, PercentGetterTimeMultiplier
+from led_machine.police import PoliceSetting
 from led_machine.rainbow import RainbowSetting
 from led_machine.settings import DimSetting, FrontDimSetting, SolidSetting, LedSettingHolder
 from led_machine.slack import SlackHelper
@@ -66,6 +67,9 @@ def main():
         [((0, 0, 255), 2), ((255, 0, 70), 4), ((255, 0, 0), 2)],
         PercentGetterTimeMultiplier(default_percent_getter, color_time_multiplier_getter)
     )
+    police_setting = PoliceSetting(
+        PercentGetterTimeMultiplier(ReversingPercentGetter(1.0, 60.0 * 60, 1.0), color_time_multiplier_getter)
+    )
 
     main_setting_holder = LedSettingHolder(rainbow_setting)
     pattern_setting_holder = LedSettingHolder(main_setting_holder)
@@ -124,6 +128,8 @@ def main():
                 main_setting_holder.setting = rainbow_setting
             elif "bpr" in text:
                 main_setting_holder.setting = bpr_setting
+            elif "police" in text:
+                main_setting_holder.setting = police_setting
 
             if "skyline" in text or "sky line" in text or "sky-line" in text:
                 dim_setting = 0.005
