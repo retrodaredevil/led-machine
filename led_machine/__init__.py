@@ -177,6 +177,9 @@ def main():
                         pattern_time_multiplier_getter
                     )
                 )
+            elif "reverse" in text and "star" in text:
+                indicates_pattern = True
+                pattern_setting_holder.setting = StarSetting(main_setting_holder, 300, 300, reverse=True)
             elif "star" in text:
                 indicates_pattern = True
                 pattern_setting_holder.setting = StarSetting(main_setting_holder, 300, 300)

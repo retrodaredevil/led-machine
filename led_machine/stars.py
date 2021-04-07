@@ -21,8 +21,10 @@ class Star:
 
 class StarSetting(AlterPixelSetting):
 
-    def __init__(self, setting: LedSetting, expected_pixels: int, padding: int):
+    def __init__(self, setting: LedSetting, expected_pixels: int, padding: int, reverse: bool = False):
         super().__init__(setting)
+        self.reverse = reverse
+
         self.spawn_lower = -padding
         self.spawn_upper = expected_pixels + padding
         self.stars: List[Star] = []
@@ -77,4 +79,6 @@ class StarSetting(AlterPixelSetting):
                 brightness = max(brightness, ((upper + star.fade_distance_right) - pixel_index) / star.fade_distance_right * star.brightness_right)
 
         assert 0.0 <= brightness <= 1.0, f"Brightness is {brightness}"
+        if self.reverse:
+            brightness = 1 - brightness
         return int(pixel_color[0] * brightness), int(pixel_color[1] * brightness), int(pixel_color[2] * brightness)
