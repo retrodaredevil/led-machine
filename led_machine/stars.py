@@ -37,7 +37,9 @@ class StarSetting(AlterPixelSetting):
             self.stars.append(star)
             star.position = randint(self.spawn_lower, self.spawn_upper)
             star.velocity = (randint(0, 1) * 2 - 1) * uniform(0.4, 2.0)
-            star.brightness = uniform(0.2, 0.8)
+            if not reverse:
+                # only have a random brightness if we aren't doing reverse
+                star.brightness = uniform(0.2, 0.8)
             star.brightness_left = star.brightness
             star.brightness_right = star.brightness
 
