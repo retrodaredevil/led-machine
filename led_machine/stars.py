@@ -74,7 +74,7 @@ class StarSetting(AlterPixelSetting):
         brightness = 0.0
         for star in self.stars:
             lower = star.position - star.thickness / 2
-            upper = star.position - star.thickness / 2
+            upper = star.position + star.thickness / 2
             if lower <= pixel_index <= upper:
                 brightness = max(brightness, star.brightness)
             elif lower - star.fade_distance_left <= pixel_index < lower:  # 3.5 to 4
