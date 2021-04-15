@@ -59,9 +59,22 @@ def main():
     quick_bounce_percent_getter = BouncePercentGetter(12.0)
     slow_default_percent_getter = ReversingPercentGetter(4.0, 10.0 * 60, 4.0)
 
-    rainbow_setting = RainbowSetting(PercentGetterTimeMultiplier(default_percent_getter, color_time_multiplier_getter), 50)
-    long_rainbow_setting = RainbowSetting(PercentGetterTimeMultiplier(default_percent_getter, color_time_multiplier_getter), 300)
-    solid_rainbow_setting = RainbowSetting(PercentGetterTimeMultiplier(ReversingPercentGetter(10.0, 15.0 * 60, 10.0), color_time_multiplier_getter), 30000000000)
+    rainbow_setting = RainbowSetting(
+        PercentGetterTimeMultiplier(default_percent_getter, color_time_multiplier_getter), 50
+    )
+    long_rainbow_setting = RainbowSetting(
+        PercentGetterTimeMultiplier(default_percent_getter, color_time_multiplier_getter), 300
+    )
+    fat_rainbow_setting = RainbowSetting(
+        PercentGetterTimeMultiplier(default_percent_getter, color_time_multiplier_getter), 100
+    )
+    tiny_rainbow_setting = RainbowSetting(
+        PercentGetterTimeMultiplier(default_percent_getter, color_time_multiplier_getter), 25
+    )
+    solid_rainbow_setting = RainbowSetting(
+        PercentGetterTimeMultiplier(ReversingPercentGetter(10.0, 15.0 * 60, 10.0), color_time_multiplier_getter),
+        30000000000
+    )
     bpr_setting = BlockSetting(
         None,
         [((0, 0, 255), 2), ((255, 0, 70), 4), ((255, 0, 0), 2)],
@@ -122,6 +135,10 @@ def main():
                 reset = True
             elif "long" in text and "rainbow" in text:
                 main_setting_holder.setting = long_rainbow_setting
+            elif "fat" in text and "rainbow" in text:
+                main_setting_holder.setting = fat_rainbow_setting
+            elif "tiny" in text and "rainbow" in text:
+                main_setting_holder.setting = tiny_rainbow_setting
             elif "solid" in text and "rainbow" in text:
                 main_setting_holder.setting = solid_rainbow_setting
             elif "rainbow" in text:
@@ -147,6 +164,8 @@ def main():
                 elif "sleep" in text:
                     dim_setting = 0.01 * 0.8
                 else:
+                    if reset:
+                        dim_setting = 0.8
                     unknown = True
                 if not unknown:
                     rear_dimmer.dim = 1.0

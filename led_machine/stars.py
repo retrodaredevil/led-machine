@@ -36,7 +36,7 @@ class StarSetting(AlterPixelSetting):
             star = Star()
             self.stars.append(star)
             star.position = randint(self.spawn_lower, self.spawn_upper)
-            star.velocity = (randint(0, 1) * 2 - 1) * uniform(0.4, 2.0)
+            star.velocity = (randint(0, 1) * 2 - 1) * uniform(0.3, 1.5)
             if reverse:
                 star.thickness = 2.0
             else:
