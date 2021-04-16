@@ -43,4 +43,4 @@ class BlockSetting(AlterPixelSetting):
         low_pixel_color = Color.from_alias(low_pixel_color)
         high_pixel_color = Color.from_alias(high_pixel_color)
 
-        return high_pixel_color.lerp(low_pixel_color, lerp_percent)
+        return low_pixel_color.lerp(high_pixel_color, lerp_percent)

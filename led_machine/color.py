@@ -15,11 +15,11 @@ class RawColor(Generic[T]):
 
     @property
     def g(self) -> float:
-        return self.__r
+        return self.__g
 
     @property
     def b(self) -> float:
-        return self.__r
+        return self.__b
 
     def __mul__(self, other) -> 'RawColor':
         scalar = float(other)  # only support numeric types
@@ -43,6 +43,12 @@ class RawColor(Generic[T]):
     def lerp(self, other: 'RawColor', percent: float) -> 'RawColor':
         return self * (1 - percent) + other * percent
 
+    def __eq__(self, other):
+        return isinstance(other, RawColor) and self.r == other.r and self.g == other.g and self.b == other.b
+
+    def __str__(self):
+        return f"Color(r={self.r}, g={self.g}, b={self.b})"
+
 
 ColorAlias = Union['Color', Tuple[int, int, int]]
 
@@ -52,9 +58,9 @@ class Color(RawColor):
         if r < 0 or r > 1:
             raise ValueError(f"r out of range! r: {r}")
         if g < 0 or g > 1:
-            raise ValueError(f"g out of range! r: {r}")
+            raise ValueError(f"g out of range! r: {g}")
         if b < 0 or b > 1:
-            raise ValueError(f"b out of range! r: {r}")
+            raise ValueError(f"b out of range! r: {b}")
         super().__init__(r, g, b)
 
     def __len__(self):
@@ -70,7 +76,7 @@ class Color(RawColor):
         raise IndexError(f"{item} is out of bounds for Color!")
 
     def tuple(self):
-        return int(255 * self.r), int(255 * self.g), int(255 * self.b)
+        return self[0], self[1], self[2]
 
     def lerp(self, other: T, percent: float) -> T:
         if isinstance(other, Color):
