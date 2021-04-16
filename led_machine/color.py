@@ -57,6 +57,18 @@ class Color(RawColor):
             raise ValueError(f"b out of range! r: {r}")
         super().__init__(r, g, b)
 
+    def __len__(self):
+        return 3
+
+    def __getitem__(self, item):
+        if item == 0:
+            return int(self.r * 255)
+        elif item == 1:
+            return int(self.g * 255)
+        elif item == 2:
+            return int(self.b * 255)
+        raise IndexError(f"{item} is out of bounds for Color!")
+
     def tuple(self):
         return int(255 * self.r), int(255 * self.g), int(255 * self.b)
 
