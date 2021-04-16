@@ -86,4 +86,4 @@ class StarSetting(AlterPixelSetting):
         assert 0.0 <= brightness <= 1.0, f"Brightness is {brightness}"
         if self.reverse:
             brightness = 1 - brightness
-        return (pixel_color * brightness).color()
+        return pixel_color.scale(brightness)

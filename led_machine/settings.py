@@ -51,7 +51,7 @@ class DimSetting(AlterPixelSetting):
         dim_setting = 1.0
         if self.pixel_range is None or self.pixel_range[0] <= pixel_index <= self.pixel_range[1]:
             dim_setting = self.dim
-        return (pixel_color * dim_setting).color()
+        return pixel_color.scale(dim_setting)
 
 
 class FrontDimSetting(AlterPixelSetting):
@@ -65,7 +65,7 @@ class FrontDimSetting(AlterPixelSetting):
         dim_amount = 1.0
         if pixel_index < 50:
             dim_amount *= pixel_index / 50
-        return (pixel_color * dim_amount).color()
+        return pixel_color.scale(dim_amount)
 
 
 class SolidSetting(LedSetting):

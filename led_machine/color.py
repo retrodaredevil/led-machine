@@ -29,7 +29,15 @@ class RawColor(Generic[T]):
         return Color(self._r, self._g, self._b)
 
     def lerp(self, other: 'RawColor', percent: float) -> 'RawColor':
-        return self * (1 - percent) + other * percent
+        if percent < 0:
+            raise ValueError(f"percent cannot be negative! percent: {percent}")
+        if percent > 1:
+            raise ValueError(f"percent cannot be greater than 1! percent: {percent}")
+        return RawColor(
+            self._r * (1 - percent) + other._r * percent,
+            self._g * (1 - percent) + other._g * percent,
+            self._b * (1 - percent) + other._b * percent
+        )
 
     def __eq__(self, other):
         return isinstance(other, RawColor) and self._r == other._r and self._g == other._g and self._b == other._b
@@ -58,9 +66,24 @@ class Color(RawColor):
     def __getitem__(self, item):
         return self.tuple[item]
 
+    def scale(self, scalar: float):
+        if scalar < 0:
+            raise ValueError(f"scalar cannot be negative! scalar: {scalar}")
+        if scalar > 1:
+            raise ValueError(f"scalar cannot be greater than 1! scalar: {scalar}")
+        return Color(self._r * scalar, self._g * scalar, self._b * scalar)
+
     def lerp(self, other: T, percent: float) -> T:
         if isinstance(other, Color):
-            return super().lerp(other, percent).color()
+            if percent < 0:
+                raise ValueError(f"percent cannot be negative! percent: {percent}")
+            if percent > 1:
+                raise ValueError(f"percent cannot be greater than 1! percent: {percent}")
+            return Color(
+                self._r * (1 - percent) + other._r * percent,
+                self._g * (1 - percent) + other._g * percent,
+                self._b * (1 - percent) + other._b * percent
+            )
         return super().lerp(other, percent)
 
     @classmethod
