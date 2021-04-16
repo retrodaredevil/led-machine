@@ -9,7 +9,7 @@ class BlockSetting(AlterPixelSetting):
     def __init__(self, setting: Optional[LedSetting], block_list: List[Tuple[Optional[ColorAlias], int]],
                  percent_getter: PercentGetter):
         super().__init__(setting)
-        self.block_list: List[Tuple[Optional[Color], int]] = [(Color.from_alias(alias), width) for alias, width in block_list]
+        self.block_list: List[Tuple[Optional[Color], int]] = [(None if alias is None else Color.from_alias(alias), width) for alias, width in block_list]
         self.percent_getter = percent_getter
         self.total_width = sum(width for _, width in block_list)
 

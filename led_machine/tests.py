@@ -15,9 +15,9 @@ class ColorTest(unittest.TestCase):
             self.assertEqual(r, color1[0])
             self.assertEqual(g, color1[1])
             self.assertEqual(b, color1[2])
-            self.assertEqual(nr, color1.r)
-            self.assertEqual(ng, color1.g)
-            self.assertEqual(nb, color1.b)
+            self.assertEqual(nr, color1._r)
+            self.assertEqual(ng, color1._g)
+            self.assertEqual(nb, color1._b)
 
 
 if __name__ == '__main__':

@@ -5,49 +5,37 @@ T = TypeVar('T', 'RawColor', 'Color')
 
 class RawColor(Generic[T]):
     def __init__(self, r: float, g: float, b: float):
-        self.__r = float(r)
-        self.__g = float(g)
-        self.__b = float(b)
-
-    @property
-    def r(self) -> float:
-        return self.__r
-
-    @property
-    def g(self) -> float:
-        return self.__g
-
-    @property
-    def b(self) -> float:
-        return self.__b
+        self._r = float(r)
+        self._g = float(g)
+        self._b = float(b)
 
     def __mul__(self, other) -> 'RawColor':
         scalar = float(other)  # only support numeric types
-        return RawColor(self.r * scalar, self.g * scalar, self.b * scalar)
+        return RawColor(self._r * scalar, self._g * scalar, self._b * scalar)
 
     def __add__(self, other) -> 'RawColor':
         if not isinstance(other, RawColor):
             raise ValueError("other must be a RawColor!")
-        return RawColor(self.r + other.r, self.g + other.g, self.b + other.b)
+        return RawColor(self._r + other._r, self._g + other._g, self._b + other._b)
 
     def __rdiv__(self, other):
         scalar = float(other)  # only support numeric types
-        return RawColor(self.r / scalar, self.g / scalar, self.b / scalar)
+        return RawColor(self._r / scalar, self._g / scalar, self._b / scalar)
 
     def clamped(self) -> 'Color':
-        return Color(max(0.0, min(1.0, self.r)), max(0.0, min(1.0, self.g)), max(0.0, min(1.0, self.b)))
+        return Color(max(0.0, min(1.0, self._r)), max(0.0, min(1.0, self._g)), max(0.0, min(1.0, self._b)))
 
     def color(self) -> 'Color':
-        return Color(self.r, self.g, self.b)
+        return Color(self._r, self._g, self._b)
 
     def lerp(self, other: 'RawColor', percent: float) -> 'RawColor':
         return self * (1 - percent) + other * percent
 
     def __eq__(self, other):
-        return isinstance(other, RawColor) and self.r == other.r and self.g == other.g and self.b == other.b
+        return isinstance(other, RawColor) and self._r == other._r and self._g == other._g and self._b == other._b
 
     def __str__(self):
-        return f"Color(r={self.r}, g={self.g}, b={self.b})"
+        return f"Color(r={self._r}, g={self._g}, b={self._b})"
 
 
 ColorAlias = Union['Color', Tuple[int, int, int]]
@@ -62,7 +50,7 @@ class Color(RawColor):
         if b < 0 or b > 1:
             raise ValueError(f"b out of range! r: {b}")
         super().__init__(r, g, b)
-        self.tuple = (int(self.r * 255), int(self.g * 255), int(self.b * 255))
+        self.tuple = (int(self._r * 255), int(self._g * 255), int(self._b * 255))
 
     def __len__(self):
         return 3

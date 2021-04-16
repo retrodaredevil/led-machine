@@ -145,7 +145,7 @@ def main():
                 main_setting_holder.setting = rainbow_setting
             elif "bpr" in text:
                 main_setting_holder.setting = bpr_setting
-            elif "police" in text:
+            elif "police" in text or "siren" in text:
                 main_setting_holder.setting = police_setting
 
             if "skyline" in text or "sky line" in text or "sky-line" in text:
@@ -175,7 +175,7 @@ def main():
                 pattern_setting_holder.setting = main_setting_holder
                 color_time_multiplier = 1.0
                 pattern_time_multiplier = 1.0
-            elif "carnival" in text:
+            elif "carnival" in text:  # TODO short and long carnival
                 indicates_pattern = True
                 pattern_setting_holder.setting = BlockSetting(
                     main_setting_holder, [(None, 5), ((0, 0, 0), 3)],
@@ -220,7 +220,7 @@ def main():
         for pixels in pixels_list:
             pixels.show()
 
-        time.sleep(.02)
+        time.sleep(.001)
 
 
 if __name__ == '__main__':
