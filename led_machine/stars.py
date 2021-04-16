@@ -1,6 +1,7 @@
 from random import randint, uniform
 from typing import Optional, Tuple, List
 
+from led_machine.color import Color
 from led_machine.settings import LedSetting, AlterPixelSetting
 
 MAX_DELTA = 0.3
@@ -67,7 +68,7 @@ class StarSetting(AlterPixelSetting):
                 star.position = self.spawn_upper - (self.spawn_lower - star.position)
         super().apply(seconds, pixels_list)
 
-    def alter(self, seconds: float, list_index: int, pixel_index: int, pixels, pixel_color: Optional) -> Optional[Tuple[int, int, int]]:
+    def alter(self, seconds: float, list_index: int, pixel_index: int, pixels, pixel_color: Optional[Color]) -> Optional[Color]:
         if not pixel_color:
             return None
 
@@ -85,4 +86,4 @@ class StarSetting(AlterPixelSetting):
         assert 0.0 <= brightness <= 1.0, f"Brightness is {brightness}"
         if self.reverse:
             brightness = 1 - brightness
-        return int(pixel_color[0] * brightness), int(pixel_color[1] * brightness), int(pixel_color[2] * brightness)
+        return (pixel_color * brightness).color()
