@@ -126,7 +126,7 @@ def main():
                 main_setting_holder.setting = SolidSetting((255, 45, 0))
             elif "yellow" in text:
                 main_setting_holder.setting = SolidSetting((255, 170, 0))
-            elif "teal" in text:
+            elif "teal" in text or "cyan" in text:
                 main_setting_holder.setting = SolidSetting((0, 255, 255))
             elif "white" in text:
                 main_setting_holder.setting = SolidSetting((255, 255, 255))
