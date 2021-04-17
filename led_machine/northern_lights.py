@@ -84,8 +84,10 @@ class NorthernLightsSetting(LedSetting):
                         fade_divisor = full_chunk_width - chunk.width
                         percent_distance = (pixel_spot - chunk_index * full_chunk_width - chunk.width) / fade_divisor
                         focal_point = chunk.get_focal_point(seconds)
+                        assert 0 <= focal_point <= 1, f"Focal point is {focal_point}"
                         if percent_distance <= focal_point:
                             pixels[pixel_index] = left_color.lerp(middle_color, percent_distance / focal_point)
                         else:
-                            pixels[pixel_index] = middle_color.lerp(right_color, (percent_distance - (1 - focal_point)) / (1 - focal_point))
+                            percent_lerp = (percent_distance - focal_point) / (1 - focal_point)
+                            pixels[pixel_index] = middle_color.lerp(right_color, percent_lerp)
                         break
