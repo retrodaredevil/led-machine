@@ -5,6 +5,7 @@ from typing import Optional
 
 from led_machine.block import BlockSetting
 from led_machine.color_parse import parse_colors
+from led_machine.northern_lights import NorthernLightsSetting
 from led_machine.percent import ReversingPercentGetter, BouncePercentGetter, MultiplierPercentGetter, \
     PercentGetterHolder, PercentGetterTimeMultiplier
 from led_machine.police import PoliceSetting
@@ -98,7 +99,9 @@ def main():
             print(f"Got text: {repr(text)}")
             reset = False
             requested_colors = parse_colors(text)
-            if requested_colors:
+            if "north" in text and len(requested_colors) >= 2:
+                main_setting_holder.setting = NorthernLightsSetting(requested_colors, 300)
+            elif requested_colors:
                 main_setting_holder.setting = SolidSetting(requested_colors[0])
             elif "off" in text:
                 main_setting_holder.setting = SolidSetting((0, 0, 0))
