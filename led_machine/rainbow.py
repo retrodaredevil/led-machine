@@ -1,3 +1,4 @@
+import math
 from typing import List, Optional
 
 from led_machine.color import Color
@@ -22,6 +23,7 @@ class RainbowSetting(LedSetting):
 def get_rainbow(percent: float) -> Color:
     spot = int(percent * 6)
     sub = (percent * 6) % 1
+    sub = 1 - (math.cos(sub * math.pi) + 1) / 2
     if spot == 0:  # add red
         return Color(sub, 1.0, 0.0)
     elif spot == 1:  # remove green

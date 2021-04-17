@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Optional
 
 from led_machine.block import BlockSetting
+from led_machine.color_parse import parse_colors
 from led_machine.percent import ReversingPercentGetter, BouncePercentGetter, MultiplierPercentGetter, \
     PercentGetterHolder, PercentGetterTimeMultiplier
 from led_machine.police import PoliceSetting
@@ -30,6 +31,8 @@ def get_time_multiplier(text) -> Optional[float]:
         return 0.5
     elif "crawl" in text:
         return 0.25
+    elif "still" in text:
+        return 0.001
     return None
 
 
@@ -94,42 +97,9 @@ def main():
             text: str = message["text"].lower()
             print(f"Got text: {repr(text)}")
             reset = False
-            if any(text.startswith(a) for a in ["#", "!", "?", "$", "%"]) and len(text) >= 4:
-                word = text.split(" ")[0][1:]
-                if len(word) == 3:
-                    word = "".join(a * 2 for a in word)
-                if len(word) == 6:
-                    try:
-                        r = int(word[0:2], 16)
-                        g = int(word[2:4], 16)
-                        b = int(word[4:6], 16)
-                        main_setting_holder.setting = SolidSetting((r, g, b))
-                    except ValueError:
-                        print(f"Couldn't parse: {repr(word)}")
-                else:
-                    print(f"Cannot parse word: {repr(word)}")
-            elif "brown" in text or ("shallow" in text and "purple" in text):
-                main_setting_holder.setting = SolidSetting((165, 42, 23))
-            elif "purple" in text and "deep" in text:
-                main_setting_holder.setting = SolidSetting((255, 0, 70))
-            elif "purple" in text:
-                main_setting_holder.setting = SolidSetting((255, 0, 255))
-            elif "pink" in text:
-                main_setting_holder.setting = SolidSetting((255, 100, 120))
-            elif "red" in text:
-                main_setting_holder.setting = SolidSetting((255, 0, 0))
-            elif "green" in text:
-                main_setting_holder.setting = SolidSetting((0, 255, 0))
-            elif "blue" in text:
-                main_setting_holder.setting = SolidSetting((0, 0, 255))
-            elif "orange" in text:
-                main_setting_holder.setting = SolidSetting((255, 45, 0))
-            elif "yellow" in text:
-                main_setting_holder.setting = SolidSetting((255, 170, 0))
-            elif "teal" in text or "cyan" in text:
-                main_setting_holder.setting = SolidSetting((0, 255, 255))
-            elif "white" in text:
-                main_setting_holder.setting = SolidSetting((255, 255, 255))
+            requested_colors = parse_colors(text)
+            if requested_colors:
+                main_setting_holder.setting = SolidSetting(requested_colors[0])
             elif "off" in text:
                 main_setting_holder.setting = SolidSetting((0, 0, 0))
                 reset = True
@@ -171,6 +141,7 @@ def main():
                     rear_dimmer.dim = 1.0
 
             indicates_pattern = False
+            # TODO pulse in and out
             if reset or "reset" in text:
                 pattern_setting_holder.setting = main_setting_holder
                 color_time_multiplier = 1.0
