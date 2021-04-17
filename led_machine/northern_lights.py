@@ -1,4 +1,5 @@
 import math
+import random
 from typing import List, Optional
 
 from led_machine.color import Color
@@ -16,6 +17,11 @@ class Chunk:
         """Width in pixels"""
         self.fade_spot = 0.5
         """The percent spot for the fade focal point."""
+        self.fade_oscillate_speed = 1.0
+        self.fade_oscillate_magnitude = 0.1
+
+    def get_focal_point(self, seconds: float) -> float:
+        return self.fade_spot + math.sin(seconds * self.fade_oscillate_speed) * self.fade_oscillate_magnitude
 
 
 class NorthernLightsSetting(LedSetting):
@@ -24,7 +30,9 @@ class NorthernLightsSetting(LedSetting):
         self.pixel_span = pixel_span
         self.offset = 0.0
         self.desired_offset = 0.0
-        self.last_seconds = 0.0  # normally we'd do None, but setting this to 0 makes code work out
+        # normally we'd set last_xxx to None, but setting to 0 makes it just work out nicely
+        self.last_seconds = 0.0
+        self.last_random = 0.0
 
         self.reset()
 
@@ -48,6 +56,17 @@ class NorthernLightsSetting(LedSetting):
             self.offset = self.desired_offset
         else:
             self.offset += math.copysign(delta * OFFSET_TRANSLATE_SPEED, self.desired_offset - self.offset)
+
+        if seconds - self.last_random >= 5:
+            self.last_random = seconds
+            choice = random.randint(0, 1)
+            if choice == 0:
+                self.set_desired_offset(random.randint(0, self.pixel_span))
+            elif choice == 1:
+                chunk = random.choice(self.chunks)
+                chunk.fade_spot = random.uniform(0.3, 0.7)
+                chunk.fade_oscillate_speed = random.uniform(0.9, 1.1)
+                chunk.fade_oscillate_magnitude = random.uniform(0.05, 0.2)
 
         full_chunk_width = self.pixel_span / len(self.chunks)
         for pixels in pixels_list:
