@@ -50,6 +50,7 @@ class NorthernLightsSetting(LedSetting):
 
     def apply(self, seconds: float, pixels_list: List[List[Optional[Color]]]):
         delta = seconds - self.last_seconds
+        self.last_seconds = seconds
         if delta > 1.0:
             self.reset()
         if abs(self.offset - self.desired_offset) < 1:
