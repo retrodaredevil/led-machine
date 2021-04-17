@@ -23,16 +23,17 @@ class RainbowSetting(LedSetting):
 def get_rainbow(percent: float) -> Color:
     spot = int(percent * 6)
     sub = (percent * 6) % 1
-    sub = 1 - (math.cos(sub * math.pi) + 1) / 2
+    cosine_adjust = 1 - (math.cos(sub * math.pi) + 1) / 2
+    amount = (sub + cosine_adjust) / 2.0
     if spot == 0:  # add red
-        return Color(sub, 1.0, 0.0)
+        return Color(amount, 1.0, 0.0)
     elif spot == 1:  # remove green
-        return Color(1.0, 1.0 - sub, 0.0)
+        return Color(1.0, 1.0 - amount, 0.0)
     elif spot == 2:  # add blue
-        return Color(1.0, 0.0, sub)
+        return Color(1.0, 0.0, amount)
     elif spot == 3:  # remove red
-        return Color(1 - sub, 0.0, 1.0)
+        return Color(1 - amount, 0.0, 1.0)
     elif spot == 4:  # add green
-        return Color(0.0, sub, 1.0)
+        return Color(0.0, amount, 1.0)
     else:  # remove blue
-        return Color(0.0, 1.0, 1.0 - sub)
+        return Color(0.0, 1.0, 1.0 - amount)
