@@ -6,7 +6,7 @@ from led_machine.color import Color
 from led_machine.settings import LedSetting
 
 
-OFFSET_TRANSLATE_SPEED = 0.5
+OFFSET_TRANSLATE_SPEED = 3.0
 """Offset translate speed in pixels per second"""
 
 
@@ -83,8 +83,9 @@ class NorthernLightsSetting(LedSetting):
                         middle_color = left_color.lerp(right_color, 0.5)
                         fade_divisor = full_chunk_width - chunk.width
                         percent_distance = (pixel_spot - chunk_index * full_chunk_width - chunk.width) / fade_divisor
-                        if percent_distance <= 0.5:
-                            pixels[pixel_index] = left_color.lerp(middle_color, percent_distance * 2)
+                        focal_point = chunk.get_focal_point(seconds)
+                        if percent_distance <= focal_point:
+                            pixels[pixel_index] = left_color.lerp(middle_color, percent_distance / focal_point)
                         else:
-                            pixels[pixel_index] = middle_color.lerp(right_color, (percent_distance - 0.5) * 2)
+                            pixels[pixel_index] = middle_color.lerp(right_color, (percent_distance - (1 - focal_point)) / (1 - focal_point))
                         break
