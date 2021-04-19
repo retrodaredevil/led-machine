@@ -25,6 +25,8 @@ def parse_colors(text: str) -> List[Color]:
             result.append(Color.from_bytes(165, 42, 23))
         elif "purple" in word and ("deep" in word or (previous_word is not None and "deep" in previous_word)):
             result.append(Color.from_bytes(255, 0, 70))
+        elif "purple" in word and ("hot" in word or (previous_word is not None and "hot" in previous_word)):
+            result.append(Color(r=1.0, g=0.0, b=0.9642934927623834))
         elif "purple" in word:
             result.append(Color.from_bytes(255, 0, 255))
         elif "pink" in word:
@@ -37,6 +39,8 @@ def parse_colors(text: str) -> List[Color]:
             result.append(Color.from_bytes(0, 0, 255))
         elif "orange" in word:
             result.append(Color.from_bytes(255, 45, 0))
+        elif "tiger" in word:
+            result.append(Color(r=1.0, g=0.7072935145244612, b=0.0))
         elif "yellow" in word:
             result.append(Color.from_bytes(255, 170, 0))
         elif "teal" in word or "cyan" in word:

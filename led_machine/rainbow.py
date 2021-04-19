@@ -37,3 +37,9 @@ def get_rainbow(percent: float) -> Color:
         return Color(0.0, amount, 1.0)
     else:  # remove blue
         return Color(0.0, 1.0, 1.0 - amount)
+
+
+if __name__ == '__main__':
+    # Just some code to get the exact color of solid rainbow at a given time.
+    millis = 1618793494672 - 5000
+    print(get_rainbow((millis / 1000 * 0.001) % 1))
