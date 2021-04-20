@@ -45,6 +45,8 @@ def parse_colors(text: str) -> List[Color]:
             result.append(Color.from_bytes(255, 170, 0))
         elif "teal" in word or "cyan" in word:
             result.append(Color.from_bytes(0, 255, 255))
+        elif "aqua" in word:
+            result.append(Color.from_bytes(0, 255, 70))
         elif "white" in word:
             result.append(Color.from_bytes(255, 255, 255))
 
