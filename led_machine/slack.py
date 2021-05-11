@@ -1,4 +1,7 @@
 from queue import Queue
+from typing import Optional
+from urllib.error import URLError
+import time
 
 from slack_sdk import WebClient
 from slack_sdk.socket_mode import SocketModeClient
@@ -13,16 +16,28 @@ class SlackHelper:
         self.app_token = app_token
         self.channel = channel
         self.message_queue = Queue()
+        self.last_connect_try: Optional[float] = None
 
         self.socket_client = SocketModeClient(
             app_token=self.app_token,
             web_client=WebClient(token=self.bot_token)
         )
         self.socket_client.socket_mode_request_listeners.append(lambda client, req: self._process_event(client, req))
-        self.socket_client.connect()
+        self.check_connected()
 
     def __del__(self):
         self.socket_client.close()
+
+    def check_connected(self):
+        if not self.socket_client.is_connected():
+            now = time.time()
+            if self.last_connect_try is not None and self.last_connect_try + 10 > now:
+                return  # We've tried in the last 10 seconds
+            self.last_connect_try = now
+            try:
+                self.socket_client.connect()
+            except URLError:
+                print("Could not connect")
 
     def _process_event(self, client: SocketModeClient, req: SocketModeRequest):
         if req.type == "events_api":
@@ -42,6 +57,7 @@ class SlackHelper:
                 # ))
 
     def new_messages(self) -> list:
+        self.check_connected()  # We don't really care if this blocks
         messages = []
         while not self.message_queue.empty():
             messages.append(self.message_queue.get())
