@@ -36,12 +36,12 @@ class SlackHelper:
             if self.last_connect_try is not None and self.last_connect_try + 10 > now:
                 return  # We've tried in the last 10 seconds
             print("Going to try to connect")
-            self.last_connect_try = now
             try:
                 self.socket_client.connect()
                 print("Connected")
             except URLError:
                 print("Could not connect")
+            self.last_connect_try = now
 
     def _process_event(self, client: SocketModeClient, req: SocketModeRequest):
         if req.type == "events_api":
