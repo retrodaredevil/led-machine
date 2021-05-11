@@ -18,12 +18,14 @@ class SlackHelper:
         self.message_queue = Queue()
         self.last_connect_try: Optional[float] = None
 
+        print("Initializing SlackHelper")
         self.socket_client = SocketModeClient(
             app_token=self.app_token,
             web_client=WebClient(token=self.bot_token)
         )
         self.socket_client.socket_mode_request_listeners.append(lambda client, req: self._process_event(client, req))
         self.check_connected()
+        print("Finished initializing SlackHelper")
 
     def __del__(self):
         self.socket_client.close()
@@ -33,9 +35,11 @@ class SlackHelper:
             now = time.time()
             if self.last_connect_try is not None and self.last_connect_try + 10 > now:
                 return  # We've tried in the last 10 seconds
+            print("Going to try to connect")
             self.last_connect_try = now
             try:
                 self.socket_client.connect()
+                print("Connected")
             except URLError:
                 print("Could not connect")
 
