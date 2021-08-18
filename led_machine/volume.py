@@ -1,4 +1,4 @@
-import time
+import array
 from queue import Queue, Empty, Full
 from typing import Optional, List, Callable
 
@@ -11,8 +11,11 @@ import signal
 import sys
 import time
 from io import BytesIO as StringIO
+
+from pydub.utils import get_array_type
 from soundmeter.settings import Config
 from soundmeter.utils import noalsaerr, coroutine
+
 
 from led_machine.percent import PercentGetter
 
@@ -95,6 +98,31 @@ class MeterBase:
                 data = self.output.getvalue()
                 segment = pydub.AudioSegment(data)
                 rms = segment.rms
+
+                bit_depth = segment.sample_width * 8
+                array_type = get_array_type(bit_depth)
+
+                numeric_array = array.array(array_type, segment.raw_data)
+                data_list = [a for a in numeric_array]
+                inverted_frame_duration = len(data_list) / segment.duration_seconds
+                # print(frame_duration)
+                frequencies = []
+                high = None
+                steps = 0
+                for level in data_list:
+                    steps += 1
+                    if high is None:
+                        high = level > 0
+                    next_high = level > -200 if high else level > 200
+                    if high is not next_high:
+                        # multiply steps by 2 because steps is half the distance between two high points
+                        frequencies.append(inverted_frame_duration / (steps * 2))
+                        steps = 0
+                        high = next_high
+                if frequencies and segment.rms > 6000:
+                    frequency = sum(frequencies) // len(frequencies)
+                    print(frequency)
+
                 self.meter(rms)
 
         except self.__class__.StopException:
