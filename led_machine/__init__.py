@@ -7,12 +7,13 @@ from led_machine.block import BlockSetting
 from led_machine.color_parse import parse_colors
 from led_machine.northern_lights import NorthernLightsSetting
 from led_machine.percent import ReversingPercentGetter, BouncePercentGetter, MultiplierPercentGetter, \
-    PercentGetterHolder, PercentGetterTimeMultiplier
+    PercentGetterHolder, PercentGetterTimeMultiplier, ConstantPercentGetter, SumPercentGetter
 from led_machine.police import PoliceSetting
 from led_machine.rainbow import RainbowSetting
 from led_machine.settings import DimSetting, FrontDimSetting, SolidSetting, LedSettingHolder
 from led_machine.slack import SlackHelper
 from led_machine.stars import StarSetting
+from led_machine.volume import VolumePercentGetter, MeterHelper, HighFrequencyPercentGetter
 
 DIM = 1.0
 
@@ -56,35 +57,41 @@ def main():
 
     color_time_multiplier = 1.0
     color_time_multiplier_getter = lambda: color_time_multiplier
+    # by default, don't "push" the color's percent getter at all
+    color_percent_getter_push = PercentGetterHolder(ConstantPercentGetter(0.0))  # TODO do the same thing for patterns
     pattern_time_multiplier = 1.0
     pattern_time_multiplier_getter = lambda: pattern_time_multiplier
 
     default_percent_getter = ReversingPercentGetter(2.0, 10.0 * 60, 2.0)
     quick_bounce_percent_getter = BouncePercentGetter(12.0)
     slow_default_percent_getter = ReversingPercentGetter(4.0, 10.0 * 60, 4.0)
+    meter_helper = MeterHelper()
+    meter_helper.start()  # starts a new thread up
+    volume_percent_getter = VolumePercentGetter(meter_helper)
+    high_frequency_percent_getter = HighFrequencyPercentGetter(meter_helper)
 
     rainbow_setting = RainbowSetting(
-        PercentGetterTimeMultiplier(default_percent_getter, color_time_multiplier_getter), 50
+        PercentGetterTimeMultiplier(SumPercentGetter([default_percent_getter, color_percent_getter_push]), color_time_multiplier_getter), 50
     )
     long_rainbow_setting = RainbowSetting(
-        PercentGetterTimeMultiplier(default_percent_getter, color_time_multiplier_getter), 300
+        PercentGetterTimeMultiplier(SumPercentGetter([default_percent_getter, color_percent_getter_push]), color_time_multiplier_getter), 300
     )
     fat_rainbow_setting = RainbowSetting(
-        PercentGetterTimeMultiplier(default_percent_getter, color_time_multiplier_getter), 100
+        PercentGetterTimeMultiplier(SumPercentGetter([default_percent_getter, color_percent_getter_push]), color_time_multiplier_getter), 100
     )
     tiny_rainbow_setting = RainbowSetting(
-        PercentGetterTimeMultiplier(default_percent_getter, color_time_multiplier_getter), 25
+        PercentGetterTimeMultiplier(SumPercentGetter([default_percent_getter, color_percent_getter_push]), color_time_multiplier_getter), 25
     )
     solid_rainbow_setting = RainbowSetting(
-        PercentGetterTimeMultiplier(ReversingPercentGetter(10.0, 15.0 * 60, 10.0), color_time_multiplier_getter),
+        PercentGetterTimeMultiplier(SumPercentGetter([ReversingPercentGetter(10.0, 15.0 * 60, 10.0), color_percent_getter_push]), color_time_multiplier_getter),
         30000000000
     )
     bpr_setting = BlockSetting(
         None,
         [((0, 0, 255), 2), ((255, 0, 70), 4), ((255, 0, 0), 2)],
-        PercentGetterTimeMultiplier(default_percent_getter, color_time_multiplier_getter)
+        PercentGetterTimeMultiplier(SumPercentGetter([default_percent_getter, color_percent_getter_push]), color_time_multiplier_getter)
     )
-    police_setting = PoliceSetting(
+    police_setting = PoliceSetting(  # there is not really a reason to add color_percent_getter_push to this
         PercentGetterTimeMultiplier(ReversingPercentGetter(1.0, 60.0 * 60, 1.0), color_time_multiplier_getter)
     )
 
@@ -92,7 +99,10 @@ def main():
     pattern_setting_holder = LedSettingHolder(main_setting_holder)
     rear_dimmer = DimSetting(FrontDimSetting(pattern_setting_holder), 1, (300 - 47, 300))
     setting = DimSetting(rear_dimmer, DIM)
+    dimmer_percent_getter = PercentGetterHolder(ConstantPercentGetter(1.0))
+    """A percent getter which stores a percent getter that dynamically controls the brightness of the lights."""
     dim_setting = 0.8
+    """A value that is changed when requested by the user"""
     while True:
         for message in slack_helper.new_messages():
             text: str = message["text"].lower()
@@ -143,12 +153,13 @@ def main():
                 if not unknown:
                     rear_dimmer.dim = 1.0
 
-            indicates_pattern = False
+            indicates_pattern = "pattern" in text
             # TODO pulse in and out
             if reset or "reset" in text:
                 pattern_setting_holder.setting = main_setting_holder
                 color_time_multiplier = 1.0
                 pattern_time_multiplier = 1.0
+                dimmer_percent_getter.percent_getter = ConstantPercentGetter(1.0)
             elif "carnival" in text:  # TODO short and long carnival
                 indicates_pattern = True
                 pattern_setting_holder.setting = BlockSetting(
@@ -177,19 +188,36 @@ def main():
                 indicates_pattern = True
                 pattern_setting_holder.setting = StarSetting(main_setting_holder, 300, 300)
 
-            if indicates_pattern or "pattern" in text:
-                # Pattern speed
-                time_multiplier = get_time_multiplier(text)
-                if time_multiplier is not None:
+            if "pulse" in text and "loud" in text:
+                dimmer_percent_getter.percent_getter = volume_percent_getter
+            elif "pulse" in text and ("freq" in text or "pitch" in text):
+                dimmer_percent_getter.percent_getter = high_frequency_percent_getter
+            elif "pulse" in text:
+                pass  # TODO pulse
+
+            time_multiplier = get_time_multiplier(text)
+            if time_multiplier is not None:
+                if indicates_pattern:
+                    # Pattern speed
                     pattern_time_multiplier = time_multiplier
-            else:
-                # Color speed
-                time_multiplier = get_time_multiplier(text)
-                if time_multiplier is not None:
+                else:
+                    # Color speed
                     color_time_multiplier = time_multiplier
+            if "push" in text:
+                if "loud" in text:
+                    if indicates_pattern:
+                        pass
+                    else:
+                        color_percent_getter_push.percent_getter = volume_percent_getter
+                elif "freq" in text or "pitch" in text:
+                    if indicates_pattern:
+                        pass
+                    else:
+                        color_percent_getter_push.percent_getter = high_frequency_percent_getter
+
         seconds = time.time()
 
-        setting.dim = DIM * dim_setting
+        setting.dim = DIM * dim_setting * dimmer_percent_getter.get_percent(seconds)
         setting.apply(seconds, pixels_list)
         for pixels in pixels_list:
             pixels.show()

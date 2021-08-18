@@ -5,6 +5,11 @@ from typing import List, Callable
 class PercentGetter(ABC):
     @abstractmethod
     def get_percent(self, seconds: float) -> float:
+        """
+        Note: In almost all cases a returned value of 1.0 should be interpreted the same as 0, but depending on what you're doing, it is not required.
+        :param seconds: The number of seconds since the epoch.
+        :return: A number in range [0..1]
+        """
         pass
 
 

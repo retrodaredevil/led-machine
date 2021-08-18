@@ -256,7 +256,7 @@ class HighFrequencyPercentGetter(PercentGetter):
         r = 0.0
         if data_node.rms < 3000:
             return 0.0
-        smooth = min(1.0, (data_node.rms - 3000) / 1000)
+        smooth = min(1.0, (data_node.rms - 2000) / 1000)
         adjusted_frequency = data_node.frequency ** 1.2
         return (smooth * min(1.0, adjusted_frequency / 17000)) ** 1.5
 
