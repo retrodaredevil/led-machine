@@ -1,4 +1,5 @@
 import array
+import dataclasses
 from queue import Queue, Empty, Full
 from typing import Optional, List, Callable
 
@@ -23,6 +24,12 @@ RECORD_PERIOD_SECONDS = .15
 DATA_KEEP_PERIOD_SECONDS = 45.0
 MAX_SIZE = int(DATA_KEEP_PERIOD_SECONDS / RECORD_PERIOD_SECONDS)
 AMBIENT_AMOUNT = 1600
+
+
+@dataclasses.dataclass
+class DataNode:
+    rms: int
+    frequency: int
 
 
 class MeterBase:
@@ -103,13 +110,11 @@ class MeterBase:
                 array_type = get_array_type(bit_depth)
 
                 numeric_array = array.array(array_type, segment.raw_data)
-                data_list = [a for a in numeric_array]
-                inverted_frame_duration = len(data_list) / segment.duration_seconds
-                # print(frame_duration)
+                inverted_frame_duration = len(numeric_array) / segment.duration_seconds
                 frequencies = []
                 high = None
                 steps = 0
-                for level in data_list:
+                for level in numeric_array:
                     steps += 1
                     if high is None:
                         high = level > 0
@@ -119,33 +124,34 @@ class MeterBase:
                         frequencies.append(inverted_frame_duration / (steps * 2))
                         steps = 0
                         high = next_high
-                if frequencies and segment.rms > 6000:
-                    frequency = sum(frequencies) // len(frequencies)
-                    print(frequency)
+                frequency = sum(frequencies) // len(frequencies) if frequencies else 0
+                # if frequencies and segment.rms > 6000:
+                #     print(frequency)
 
-                self.meter(rms)
+                data_node = DataNode(rms, frequency)
+                self.meter(data_node)
 
         except self.__class__.StopException:
             pass
 
-    def meter(self, rms):
-        sys.stdout.write('\r%10d  ' % rms)
+    def meter(self, data_node: DataNode):
+        sys.stdout.write('\r%10d  ' % data_node.rms)
         sys.stdout.flush()
 
 
 class MyMeter(MeterBase):
     def __init__(self):
         super().__init__()
-        self.queue = Queue(100)
+        self.queue: Queue[DataNode] = Queue(100)
 
-    def meter(self, rms):
+    def meter(self, data_node: DataNode):
         try:
-            self.queue.put_nowait(rms)
+            self.queue.put_nowait(data_node)
         except Full:
             pass
 
 
-def single_reduce(data: List[int], chooser: Callable[[int, int], int]) -> List[int]:
+def single_reduce(data: List[DataNode], chooser: Callable[[DataNode, DataNode], DataNode]) -> List[DataNode]:
     length = len(data) // 2
     r = []
     for i in range(length):
@@ -178,7 +184,7 @@ class MeterHelper:
         self.meter.config.AUDIO_SEGMENT_LENGTH = RECORD_PERIOD_SECONDS
         self.thread = threading.Thread(target=lambda: self.__do_run(), args=())
         self.thread.daemon = True
-        self.data: List[int] = [1000] * MAX_SIZE
+        self.data: List[DataNode] = [DataNode(1000, 0)] * MAX_SIZE
         self.next_index: int = 0
 
     def start(self):
@@ -189,13 +195,13 @@ class MeterHelper:
         self.meter.start()
         print("Ended run")
 
-    def pop_value(self) -> Optional[int]:
+    def pop_value(self) -> Optional[DataNode]:
         try:
             return self.meter.queue.get_nowait()
         except Empty:
             return None
 
-    def get_current_value(self) -> Optional[int]:
+    def get_current_value(self) -> Optional[DataNode]:
         return self.data[-1] if self.data else None
 
     def update(self):
@@ -213,15 +219,15 @@ class MeterHelper:
         return sum(data) / len(data)
 
     def percent_over_seconds(self, seconds: float):
-        now = self.get_current_value()
-        low_data = single_reduce(self.data[get_slice_for_time(-seconds)], min)
-        low_normal = sum(low_data) / len(low_data)
+        now = self.get_current_value().rms
+        low_data = single_reduce(self.data[get_slice_for_time(-seconds)], lambda a, b: a if a.rms < b.rms else b)
+        low_normal = sum(a.rms for a in low_data) / len(low_data)
         diff = now - low_normal - AMBIENT_AMOUNT
         whole_diff = diff / (seconds * 100 + 9000)
         return max(0.0, min(1.0, .3 + whole_diff))
 
     def get_volume_percent(self):
-        now = self.get_current_value() - AMBIENT_AMOUNT
+        now = self.get_current_value().rms - AMBIENT_AMOUNT
         return max(0.0, min(1.0, now / 20000))
 
     def get_relative_percent(self):
@@ -240,17 +246,36 @@ class VolumePercentGetter(PercentGetter):
         return percent
 
 
+class HighFrequencyPercentGetter(PercentGetter):
+    def __init__(self, helper: MeterHelper):
+        self.helper = helper
+
+    def get_percent(self, seconds: float) -> float:
+        self.helper.update()
+        data_node = self.helper.get_current_value()
+        r = 0.0
+        if data_node.rms < 3000:
+            return 0.0
+        smooth = min(1.0, (data_node.rms - 3000) / 1000)
+        adjusted_frequency = data_node.frequency ** 1.2
+        return (smooth * min(1.0, adjusted_frequency / 17000)) ** 1.5
+
+
 def main():
     helper = MeterHelper()
     helper.start()
     percent_getter = VolumePercentGetter(helper)
+    frequency_percent_getter = HighFrequencyPercentGetter(helper)
     while True:
-        percent = percent_getter.get_percent(0.0)
-        bars = int(100 * percent)
-        total_space = 100 - bars
-        left_space = total_space // 2
-        right_space = total_space - left_space
-        print(" " * left_space + "|" * bars + " " * right_space + ">")
+        p = percent_getter.get_percent(0.0)
+        percents = [p, frequency_percent_getter.get_percent(0.0)]
+        for percent in percents:
+            bars = int(100 * percent)
+            total_space = 100 - bars
+            left_space = total_space // 2
+            right_space = total_space - left_space
+            print(" " * left_space + "|" * bars + " " * right_space + ">", end="")
+        print()
         time.sleep(0.06)
 
 
