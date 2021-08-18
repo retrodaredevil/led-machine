@@ -1,5 +1,5 @@
 import time
-from queue import Queue, Empty
+from queue import Queue, Empty, Full
 from typing import Optional, List, Callable
 
 import threading
@@ -13,6 +13,8 @@ import time
 from io import BytesIO as StringIO
 from soundmeter.settings import Config
 from soundmeter.utils import noalsaerr, coroutine
+
+from led_machine.percent import PercentGetter
 
 RECORD_PERIOD_SECONDS = .15
 DATA_KEEP_PERIOD_SECONDS = 45.0
@@ -106,10 +108,13 @@ class MeterBase:
 class MyMeter(MeterBase):
     def __init__(self):
         super().__init__()
-        self.queue = Queue()
+        self.queue = Queue(100)
 
     def meter(self, rms):
-        self.queue.put(rms)
+        try:
+            self.queue.put_nowait(rms)
+        except Full:
+            pass
 
 
 def single_reduce(data: List[int], chooser: Callable[[int, int], int]) -> List[int]:
@@ -166,8 +171,12 @@ class MeterHelper:
         return self.data[-1] if self.data else None
 
     def update(self):
-        value = self.pop_value()
-        if value is not None:
+        # Almost all of the time we're only going to pop 0 or 1 values, but if this isn't updated in a while, then
+        #   we may have to update a bunch
+        while True:
+            value = self.pop_value()
+            if value is None:
+                break
             self.data.append(value)
             self.data.pop(0)
 
@@ -191,17 +200,24 @@ class MeterHelper:
         return self.percent_over_seconds(20) * .3 + self.percent_over_seconds(10) * .1 + self.percent_over_seconds(5) * .2 + self.percent_over_seconds(3) * .3 + self.percent_over_seconds(1) * .1
 
 
-ORIGINAL = ((30, .5), (10, .2), (3, .2), (1, .1))
+class VolumePercentGetter(PercentGetter):
+    def __init__(self, helper: MeterHelper):
+        self.helper = helper
+
+    def get_percent(self, seconds: float) -> float:
+        self.helper.update()
+        volume_percent = self.helper.get_volume_percent()
+        relative_percent = self.helper.get_relative_percent()
+        percent = (volume_percent ** 2.0) * .6 + relative_percent * .4
+        return percent
 
 
 def main():
     helper = MeterHelper()
     helper.start()
+    percent_getter = VolumePercentGetter(helper)
     while True:
-        helper.update()
-        volume_percent = helper.get_volume_percent()
-        relative_percent = helper.get_relative_percent()
-        percent = (volume_percent ** 2.0) * .6 + relative_percent * .4
+        percent = percent_getter.get_percent(0.0)
         bars = int(100 * percent)
         total_space = 100 - bars
         left_space = total_space // 2
