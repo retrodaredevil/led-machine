@@ -17,6 +17,7 @@ from soundmeter.utils import noalsaerr, coroutine
 RECORD_PERIOD_SECONDS = .15
 DATA_KEEP_PERIOD_SECONDS = 45.0
 MAX_SIZE = int(DATA_KEEP_PERIOD_SECONDS / RECORD_PERIOD_SECONDS)
+AMBIENT_AMOUNT = 1600
 
 
 class MeterBase:
@@ -144,7 +145,7 @@ class MeterHelper:
         self.meter.config.AUDIO_SEGMENT_LENGTH = RECORD_PERIOD_SECONDS
         self.thread = threading.Thread(target=lambda: self.__do_run(), args=())
         self.thread.daemon = True
-        self.data: List[int] = []
+        self.data: List[int] = [1000] * MAX_SIZE
         self.next_index: int = 0
 
     def start(self):
@@ -168,42 +169,26 @@ class MeterHelper:
         value = self.pop_value()
         if value is not None:
             self.data.append(value)
-            while len(self.data) > MAX_SIZE:
-                self.data.pop(0)
+            self.data.pop(0)
 
     def average_over(self, my_slice: slice) -> Optional[float]:
-        if not self.data:
-            return None
         data = self.data[my_slice]
         return sum(data) / len(data)
 
     def percent_over_seconds(self, seconds: float):
         now = self.get_current_value()
-        if now is None:
-            return None
         low_data = single_reduce(self.data[get_slice_for_time(-seconds)], min)
-        if not low_data:
-            return None
         low_normal = sum(low_data) / len(low_data)
-        diff = now - low_normal
+        diff = now - low_normal - AMBIENT_AMOUNT
         whole_diff = diff / (seconds * 100 + 9000)
-        return max(0.0, min(1.0, .5 + whole_diff))
+        return max(0.0, min(1.0, .3 + whole_diff))
 
     def get_volume_percent(self):
-        now = self.get_current_value()
-        if now is None:
-            return None
+        now = self.get_current_value() - AMBIENT_AMOUNT
         return max(0.0, min(1.0, now / 20000))
 
     def get_relative_percent(self):
-        now = self.get_current_value()
-        if now is None:
-            return None
-        first = self.percent_over_seconds(20)
-        if first is None:
-            return None
-
-        return first * .3 + self.percent_over_seconds(10) * .1 + self.percent_over_seconds(5) * .2 + self.percent_over_seconds(3) * .3 + self.percent_over_seconds(1) * .1
+        return self.percent_over_seconds(20) * .3 + self.percent_over_seconds(10) * .1 + self.percent_over_seconds(5) * .2 + self.percent_over_seconds(3) * .3 + self.percent_over_seconds(1) * .1
 
 
 ORIGINAL = ((30, .5), (10, .2), (3, .2), (1, .1))
@@ -216,10 +201,12 @@ def main():
         helper.update()
         volume_percent = helper.get_volume_percent()
         relative_percent = helper.get_relative_percent()
-        if volume_percent is not None and relative_percent is not None:
-            percent = volume_percent * .25 + relative_percent * .75
-            bars = int(100 * percent)
-            print("|" * bars + " " * (100 - bars) + ">")
+        percent = (volume_percent ** 2.0) * .6 + relative_percent * .4
+        bars = int(100 * percent)
+        total_space = 100 - bars
+        left_space = total_space // 2
+        right_space = total_space - left_space
+        print(" " * left_space + "|" * bars + " " * right_space + ">")
         time.sleep(0.06)
 
 
