@@ -5,6 +5,7 @@ from typing import Optional
 
 from led_machine.block import BlockSetting
 from led_machine.color_parse import parse_colors
+from led_machine.fade import FadeSetting
 from led_machine.northern_lights import NorthernLightsSetting
 from led_machine.percent import ReversingPercentGetter, BouncePercentGetter, MultiplierPercentGetter, \
     PercentGetterHolder, PercentGetterTimeMultiplier, ConstantPercentGetter, SumPercentGetter
@@ -70,21 +71,12 @@ def main():
     volume_percent_getter = VolumePercentGetter(meter_helper)
     high_frequency_percent_getter = HighFrequencyPercentGetter(meter_helper)
 
+    color_percent_getter = SumPercentGetter([default_percent_getter, color_percent_getter_push])
+    """The percent getter that should be used for all color settings except for solid"""
+    solid_color_percent_getter = SumPercentGetter([ReversingPercentGetter(10.0, 15.0 * 60, 10.0), color_percent_getter_push])
+    """The percent getter that should be used for solid color settings"""
     rainbow_setting = RainbowSetting(
-        PercentGetterTimeMultiplier(SumPercentGetter([default_percent_getter, color_percent_getter_push]), color_time_multiplier_getter), 50
-    )
-    long_rainbow_setting = RainbowSetting(
-        PercentGetterTimeMultiplier(SumPercentGetter([default_percent_getter, color_percent_getter_push]), color_time_multiplier_getter), 300
-    )
-    fat_rainbow_setting = RainbowSetting(
-        PercentGetterTimeMultiplier(SumPercentGetter([default_percent_getter, color_percent_getter_push]), color_time_multiplier_getter), 100
-    )
-    tiny_rainbow_setting = RainbowSetting(
-        PercentGetterTimeMultiplier(SumPercentGetter([default_percent_getter, color_percent_getter_push]), color_time_multiplier_getter), 25
-    )
-    solid_rainbow_setting = RainbowSetting(
-        PercentGetterTimeMultiplier(SumPercentGetter([ReversingPercentGetter(10.0, 15.0 * 60, 10.0), color_percent_getter_push]), color_time_multiplier_getter),
-        30000000000
+        PercentGetterTimeMultiplier(color_percent_getter, color_time_multiplier_getter), 50
     )
     bpr_setting = BlockSetting(
         None,
@@ -111,21 +103,39 @@ def main():
             requested_colors = parse_colors(text)
             if "north" in text and len(requested_colors) >= 2:
                 main_setting_holder.setting = NorthernLightsSetting(requested_colors, 300)
+            elif "pixel" in text and len(requested_colors) >= 2:
+                main_setting_holder.setting = BlockSetting(
+                    None,
+                    [(color, 1) for color in requested_colors],
+                    PercentGetterTimeMultiplier(color_percent_getter, color_time_multiplier_getter)
+                )
+            elif "rainbow" in text or len(requested_colors) >= 2:
+                pattern_size = 50
+                percent_getter = color_percent_getter
+                if "long" in text:
+                    pattern_size = 300
+                elif "fat" in text:
+                    pattern_size = 100
+                elif "tiny" in text:
+                    pattern_size = 25
+                elif "solid" in text:
+                    pattern_size = 30000000000
+                    percent_getter = solid_color_percent_getter
+
+                if "rainbow" in text:
+                    main_setting_holder.setting = RainbowSetting(PercentGetterTimeMultiplier(percent_getter, color_time_multiplier_getter), pattern_size)
+                else:
+                    main_setting_holder.setting = FadeSetting(
+                        PercentGetterTimeMultiplier(percent_getter, color_time_multiplier_getter),
+                        requested_colors,
+                        pattern_size
+                    )
+
             elif requested_colors:
                 main_setting_holder.setting = SolidSetting(requested_colors[0])
             elif "off" in text:
                 main_setting_holder.setting = SolidSetting((0, 0, 0))
                 reset = True
-            elif "long" in text and "rainbow" in text:
-                main_setting_holder.setting = long_rainbow_setting
-            elif "fat" in text and "rainbow" in text:
-                main_setting_holder.setting = fat_rainbow_setting
-            elif "tiny" in text and "rainbow" in text:
-                main_setting_holder.setting = tiny_rainbow_setting
-            elif "solid" in text and "rainbow" in text:
-                main_setting_holder.setting = solid_rainbow_setting
-            elif "rainbow" in text:
-                main_setting_holder.setting = rainbow_setting
             elif "bpr" in text:
                 main_setting_holder.setting = bpr_setting
             elif "police" in text or "siren" in text:
