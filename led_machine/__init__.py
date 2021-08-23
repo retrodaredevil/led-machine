@@ -44,7 +44,7 @@ def main():
     import neopixel
 
     pixels_list = [
-        neopixel.NeoPixel(board.D18, 300),  # AKA GPIO 18
+        neopixel.NeoPixel(board.D18, 450),  # AKA GPIO 18
     ]
     pixels_list[0].auto_write = False
 
@@ -66,10 +66,10 @@ def main():
     default_percent_getter = ReversingPercentGetter(2.0, 10.0 * 60, 2.0)
     quick_bounce_percent_getter = BouncePercentGetter(12.0)
     slow_default_percent_getter = ReversingPercentGetter(4.0, 10.0 * 60, 4.0)
-    meter_helper = MeterHelper()
-    meter_helper.start()  # starts a new thread up
-    volume_percent_getter = VolumePercentGetter(meter_helper)
-    high_frequency_percent_getter = HighFrequencyPercentGetter(meter_helper)
+    # meter_helper = MeterHelper()
+    # meter_helper.start()  # starts a new thread up
+    # volume_percent_getter = VolumePercentGetter(meter_helper)
+    # high_frequency_percent_getter = HighFrequencyPercentGetter(meter_helper)
 
     color_percent_getter = SumPercentGetter([default_percent_getter, color_percent_getter_push])
     """The percent getter that should be used for all color settings except for solid"""
@@ -89,8 +89,7 @@ def main():
 
     main_setting_holder = LedSettingHolder(rainbow_setting)
     pattern_setting_holder = LedSettingHolder(main_setting_holder)
-    rear_dimmer = DimSetting(FrontDimSetting(pattern_setting_holder), 1, (300 - 47, 300))
-    setting = DimSetting(rear_dimmer, DIM)
+    setting = DimSetting(pattern_setting_holder, DIM)
     dimmer_percent_getter = PercentGetterHolder(ConstantPercentGetter(1.0))
     """A percent getter which stores a percent getter that dynamically controls the brightness of the lights."""
     dim_setting = 0.8
@@ -143,7 +142,6 @@ def main():
 
             if "skyline" in text or "sky line" in text or "sky-line" in text:
                 dim_setting = 0.005
-                rear_dimmer.dim = 0.0
             else:
                 unknown = False
                 if "bright" in text:
@@ -161,7 +159,8 @@ def main():
                         dim_setting = 0.8
                     unknown = True
                 if not unknown:
-                    rear_dimmer.dim = 1.0
+                    # rear_dimmer.dim = 1.0
+                    pass
 
             indicates_pattern = "pattern" in text
             # TODO pulse in and out
@@ -199,9 +198,11 @@ def main():
                 pattern_setting_holder.setting = StarSetting(main_setting_holder, 300, 300)
 
             if "pulse" in text and "loud" in text:
-                dimmer_percent_getter.percent_getter = volume_percent_getter
+                # dimmer_percent_getter.percent_getter = volume_percent_getter
+                pass
             elif "pulse" in text and ("freq" in text or "pitch" in text):
-                dimmer_percent_getter.percent_getter = high_frequency_percent_getter
+                # dimmer_percent_getter.percent_getter = high_frequency_percent_getter
+                pass
             elif "pulse" in text:
                 pass  # TODO pulse
 
@@ -218,12 +219,14 @@ def main():
                     if indicates_pattern:
                         pass
                     else:
-                        color_percent_getter_push.percent_getter = volume_percent_getter
+                        # color_percent_getter_push.percent_getter = volume_percent_getter
+                        pass
                 elif "freq" in text or "pitch" in text:
                     if indicates_pattern:
                         pass
                     else:
-                        color_percent_getter_push.percent_getter = high_frequency_percent_getter
+                        # color_percent_getter_push.percent_getter = high_frequency_percent_getter
+                        pass
 
         seconds = time.time()
 

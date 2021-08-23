@@ -47,3 +47,14 @@ Run:
 ```shell
 mypy led_machine
 ```
+
+
+### Other
+* RPi install for audio stuff: `https://stackoverflow.com/a/54396790/5434860`
+
+```shell
+pi@raspberrypi:~/led-machine $ sudo systemctl daemon-reload
+pi@raspberrypi:~/led-machine $ sudo systemctl enable led-machine
+Created symlink /etc/systemd/system/multi-user.target.wants/led-machine.service → /etc/systemd/system/led-machine.service.
+pi@raspberrypi:~/led-machine $ sudo systemctl start led-machine
+```
