@@ -7,11 +7,12 @@ from led_machine.settings import LedSetting, AlterPixelSetting
 
 class BlockSetting(AlterPixelSetting):
     def __init__(self, setting: Optional[LedSetting], block_list: List[Tuple[Optional[ColorAlias], int]],
-                 percent_getter: PercentGetter):
+                 percent_getter: PercentGetter, fade: bool = True):
         super().__init__(setting)
         self.block_list: List[Tuple[Optional[Color], int]] = [(None if alias is None else Color.from_alias(alias), width) for alias, width in block_list]
         self.percent_getter = percent_getter
         self.total_width = sum(width for _, width in block_list)
+        self.fade = fade
 
     def _get_color(self, pixel: int) -> Optional[Color]:
         offset = 0
@@ -41,4 +42,8 @@ class BlockSetting(AlterPixelSetting):
         if high_pixel_color is None:
             high_pixel_color = ColorConstants.BLACK
 
+        if not self.fade:
+            if round(lerp_percent) == 1:
+                return high_pixel_color
+            return low_pixel_color
         return low_pixel_color.lerp(high_pixel_color, lerp_percent)

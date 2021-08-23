@@ -106,7 +106,8 @@ def main():
                 main_setting_holder.setting = BlockSetting(
                     None,
                     [(color, 1) for color in requested_colors],
-                    PercentGetterTimeMultiplier(color_percent_getter, color_time_multiplier_getter)
+                    PercentGetterTimeMultiplier(color_percent_getter, color_time_multiplier_getter),
+                    fade=False
                 )
             elif "rainbow" in text or len(requested_colors) >= 2:
                 pattern_size = 50
