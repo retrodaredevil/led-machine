@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Optional
 
 from led_machine.block import BlockSetting
+from led_machine.centered_bar import CenteredBarSetting
 from led_machine.color_parse import parse_colors
 from led_machine.fade import FadeSetting
 from led_machine.northern_lights import NorthernLightsSetting
@@ -196,6 +197,8 @@ def main():
             elif "star" in text:
                 indicates_pattern = True
                 pattern_setting_holder.setting = StarSetting(main_setting_holder, 300, 300)
+            elif "sound" in text and "bar" in text:
+                pattern_setting_holder.setting = CenteredBarSetting(main_setting_holder, volume_percent_getter, 75)
 
             if "pulse" in text and "loud" in text:
                 dimmer_percent_getter.percent_getter = volume_percent_getter
