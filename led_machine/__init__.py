@@ -222,8 +222,7 @@ def main():
                     if indicates_pattern:
                         pass
                     else:
-                        # color_percent_getter_push.percent_getter = high_frequency_percent_getter
-                        pass
+                        color_percent_getter_push.percent_getter = high_frequency_percent_getter
 
         seconds = time.time()
 
