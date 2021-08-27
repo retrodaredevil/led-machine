@@ -66,10 +66,9 @@ def main():
     default_percent_getter = ReversingPercentGetter(2.0, 10.0 * 60, 2.0)
     quick_bounce_percent_getter = BouncePercentGetter(12.0)
     slow_default_percent_getter = ReversingPercentGetter(4.0, 10.0 * 60, 4.0)
-    # meter_helper = MeterHelper()
-    # meter_helper.start()  # starts a new thread up
-    # volume_percent_getter = VolumePercentGetter(meter_helper)
-    # high_frequency_percent_getter = HighFrequencyPercentGetter(meter_helper)
+    meter_helper = MeterHelper()
+    volume_percent_getter = VolumePercentGetter(meter_helper)
+    high_frequency_percent_getter = HighFrequencyPercentGetter(meter_helper)
 
     color_percent_getter = SumPercentGetter([default_percent_getter, color_percent_getter_push])
     """The percent getter that should be used for all color settings except for solid"""
@@ -199,11 +198,9 @@ def main():
                 pattern_setting_holder.setting = StarSetting(main_setting_holder, 300, 300)
 
             if "pulse" in text and "loud" in text:
-                # dimmer_percent_getter.percent_getter = volume_percent_getter
-                pass
+                dimmer_percent_getter.percent_getter = volume_percent_getter
             elif "pulse" in text and ("freq" in text or "pitch" in text):
-                # dimmer_percent_getter.percent_getter = high_frequency_percent_getter
-                pass
+                dimmer_percent_getter.percent_getter = high_frequency_percent_getter
             elif "pulse" in text:
                 pass  # TODO pulse
 
@@ -220,8 +217,7 @@ def main():
                     if indicates_pattern:
                         pass
                     else:
-                        # color_percent_getter_push.percent_getter = volume_percent_getter
-                        pass
+                        color_percent_getter_push.percent_getter = volume_percent_getter
                 elif "freq" in text or "pitch" in text:
                     if indicates_pattern:
                         pass

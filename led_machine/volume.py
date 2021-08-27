@@ -11,6 +11,7 @@ import wave
 import signal
 import sys
 import time
+import traceback
 from io import BytesIO as StringIO
 
 from pydub.utils import get_array_type
@@ -178,17 +179,32 @@ def get_slice_for_time(seconds_ago_start: float, seconds_ago_end: float = 0.0):
 
 
 class MeterHelper:
-    def __init__(self):
+    """
+    Auto starts the thread when update is called
+    """
 
-        self.meter = MyMeter()
-        self.meter.config.AUDIO_SEGMENT_LENGTH = RECORD_PERIOD_SECONDS
+    def __init__(self):
+        self.meter: Optional[MyMeter] = None
         self.thread = threading.Thread(target=lambda: self.__do_run(), args=())
         self.thread.daemon = True
         self.data: List[DataNode] = [DataNode(1000, 0)] * MAX_SIZE
         self.next_index: int = 0
+        self.last_initialize: Optional[int] = None
+        self.initialize()
 
-    def start(self):
-        self.thread.start()
+    def initialize(self):
+        self.last_initialize = time.time()
+        try:
+            self.meter = MyMeter()
+            self.meter.config.AUDIO_SEGMENT_LENGTH = RECORD_PERIOD_SECONDS
+        except Exception:
+            traceback.print_exc()
+        else:
+            self.thread.start()
+            print('Starting thread because success')
+
+    def is_running(self):
+        return self.thread.is_alive()
 
     def __do_run(self):
         print("Starting run")
@@ -205,6 +221,9 @@ class MeterHelper:
         return self.data[-1] if self.data else None
 
     def update(self):
+        now = time.time()
+        if not self.is_running() and (self.last_initialize is None or self.last_initialize + 5.0 < now):  # hard code 5 seconds
+            self.initialize()
         # Almost all of the time we're only going to pop 0 or 1 values, but if this isn't updated in a while, then
         #   we may have to update a bunch
         while True:
@@ -263,7 +282,6 @@ class HighFrequencyPercentGetter(PercentGetter):
 
 def main():
     helper = MeterHelper()
-    helper.start()
     percent_getter = VolumePercentGetter(helper)
     frequency_percent_getter = HighFrequencyPercentGetter(helper)
     while True:

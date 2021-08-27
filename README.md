@@ -58,3 +58,33 @@ pi@raspberrypi:~/led-machine $ sudo systemctl enable led-machine
 Created symlink /etc/systemd/system/multi-user.target.wants/led-machine.service → /etc/systemd/system/led-machine.service.
 pi@raspberrypi:~/led-machine $ sudo systemctl start led-machine
 ```
+
+### Setting up Mic on Raspberry Pi
+https://developers.google.com/assistant/sdk/guides/library/python/embed/audio
+
+Basically:
+```shell
+arecord -l
+aplay -l
+```
+Create file `/home/pi/.asoundrc` with contents
+
+```
+pcm.!default {
+  type asym
+  capture.pcm "mic"
+  playback.pcm "speaker"
+}
+pcm.mic {
+  type plug
+  slave {
+    pcm "hw:<card number>,<device number>"
+  }
+}
+pcm.speaker {
+  type plug
+  slave {
+    pcm "hw:<card number>,<device number>"
+  }
+}
+```
