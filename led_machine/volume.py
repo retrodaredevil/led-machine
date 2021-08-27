@@ -19,7 +19,7 @@ from soundmeter.settings import Config
 from soundmeter.utils import noalsaerr, coroutine
 
 
-from led_machine.percent import PercentGetter
+from led_machine.percent import PercentGetter, SmoothPercentGetter
 
 RECORD_PERIOD_SECONDS = .15
 DATA_KEEP_PERIOD_SECONDS = 45.0
@@ -287,11 +287,12 @@ class HighFrequencyPercentGetter(PercentGetter):
 
 def main():
     helper = MeterHelper()
-    percent_getter = VolumePercentGetter(helper)
+    percent_getter = SmoothPercentGetter(VolumePercentGetter(helper))
     frequency_percent_getter = HighFrequencyPercentGetter(helper)
     while True:
-        p = percent_getter.get_percent(0.0)
-        percents = [p, frequency_percent_getter.get_percent(0.0)]
+        now = time.time()
+        p = percent_getter.get_percent(now)
+        percents = [p, frequency_percent_getter.get_percent(now)]
         for percent in percents:
             bars = int(100 * percent)
             total_space = 100 - bars

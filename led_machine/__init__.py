@@ -9,7 +9,7 @@ from led_machine.color_parse import parse_colors
 from led_machine.fade import FadeSetting
 from led_machine.northern_lights import NorthernLightsSetting
 from led_machine.percent import ReversingPercentGetter, BouncePercentGetter, MultiplierPercentGetter, \
-    PercentGetterHolder, PercentGetterTimeMultiplier, ConstantPercentGetter, SumPercentGetter
+    PercentGetterHolder, PercentGetterTimeMultiplier, ConstantPercentGetter, SumPercentGetter, SmoothPercentGetter
 from led_machine.police import PoliceSetting
 from led_machine.rainbow import RainbowSetting
 from led_machine.settings import DimSetting, FrontDimSetting, SolidSetting, LedSettingHolder
@@ -68,7 +68,7 @@ def main():
     quick_bounce_percent_getter = BouncePercentGetter(12.0)
     slow_default_percent_getter = ReversingPercentGetter(4.0, 10.0 * 60, 4.0)
     meter_helper = MeterHelper()
-    volume_percent_getter = VolumePercentGetter(meter_helper)
+    volume_percent_getter = SmoothPercentGetter(VolumePercentGetter(meter_helper))
     high_frequency_percent_getter = HighFrequencyPercentGetter(meter_helper)
 
     color_percent_getter = SumPercentGetter([default_percent_getter, color_percent_getter_push])

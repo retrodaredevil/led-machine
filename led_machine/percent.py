@@ -1,5 +1,6 @@
+import math
 from abc import abstractmethod, ABC
-from typing import List, Callable
+from typing import List, Callable, Optional
 
 
 class PercentGetter(ABC):
@@ -94,3 +95,32 @@ class BouncePercentGetter(PercentGetter):
         if spot > self.total_period / 2:
             spot = self.total_period - spot
         return spot / self.total_period * 2
+
+
+class SmoothPercentGetter(PercentGetter):
+    """
+    Smooths a percentage from 0 to 1, but does not (yet) do any continuous smoothing. (0 and 1 are not the same)
+    """
+    PERCENT_MOVE_PER_SECOND = 5.0
+
+    def __init__(self, percent_getter: PercentGetter):
+        self.percent_getter = percent_getter
+        self.current_percent = 0.0
+        self.last_time: Optional[float] = None
+
+    def get_percent(self, seconds: float) -> float:
+        delta = seconds - self.last_time if self.last_time is not None else 0.01  # hard code a default delta
+        self.last_time = seconds
+        max_move = delta * self.__class__.PERCENT_MOVE_PER_SECOND
+        desired_percent = self.percent_getter.get_percent(seconds)
+        # print(desired_percent)
+        # print(self.current_percent)
+        # print()
+        direction = math.copysign(1, desired_percent - self.current_percent)
+        new_percent = self.current_percent + direction * max_move
+        if direction > 0 and new_percent > desired_percent:
+            new_percent = desired_percent
+        elif direction < 0 and new_percent < desired_percent:
+            new_percent = desired_percent
+        self.current_percent = new_percent
+        return new_percent
