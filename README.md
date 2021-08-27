@@ -88,3 +88,12 @@ pcm.speaker {
   }
 }
 ```
+
+And also run command:
+```shell
+sudo apt install ffmpeg
+```
+
+### Common audio issues:
+* https://github.com/Uberi/speech_recognition/issues/444
+  * https://github.com/alphacep/vosk-api/issues/383

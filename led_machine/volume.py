@@ -50,13 +50,16 @@ class MeterBase:
         self.output = StringIO()
         with noalsaerr():
             self.audio = pyaudio.PyAudio()
+        print(f"NOT using channels={self.config.CHANNELS}. Passing 1 instead")
+        # Instead of changing the profile upstream, we just override it here. It's not perfect, but neither is most of the code in this file
         self.stream = self.audio.open(
             format=self.config.FORMAT,
-            channels=self.config.CHANNELS,
+            channels=1,  # if this is too high, this will throw an exception
             input_device_index=self.config.INPUT_DEVICE_INDEX,
             input=True,
             rate=self.config.RATE,
-            frames_per_buffer=self.config.FRAMES_PER_BUFFER)
+            frames_per_buffer=8192  # thanks https://stackoverflow.com/a/28178666/5434860 for the help
+        )
         self.seconds = seconds
         self.num = num
         self.script = script
@@ -185,14 +188,16 @@ class MeterHelper:
 
     def __init__(self):
         self.meter: Optional[MyMeter] = None
-        self.thread = threading.Thread(target=lambda: self.__do_run(), args=())
-        self.thread.daemon = True
+        self.thread: Optional[threading.Thread] = None
         self.data: List[DataNode] = [DataNode(1000, 0)] * MAX_SIZE
         self.next_index: int = 0
         self.last_initialize: Optional[int] = None
         self.initialize()
 
     def initialize(self):
+        self.thread = threading.Thread(target=lambda: self.__do_run(), args=())
+        self.thread.daemon = True
+
         self.last_initialize = time.time()
         try:
             self.meter = MyMeter()
