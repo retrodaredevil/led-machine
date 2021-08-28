@@ -73,5 +73,8 @@ class TwinkleSetting(AlterPixelSetting):
             brightness = twinkle.get_brightness(seconds)
             max_brightness = max(max_brightness, brightness)
 
+        for twinkle in to_remove:
+            twinkle_list.remove(twinkle)
+
         return (pixel_color * max_brightness).color()
 
