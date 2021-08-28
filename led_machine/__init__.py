@@ -170,6 +170,7 @@ def main():
                 color_time_multiplier = 1.0
                 pattern_time_multiplier = 1.0
                 dimmer_percent_getter.percent_getter = ConstantPercentGetter(1.0)
+                color_percent_getter_push.percent_getter = ConstantPercentGetter(0.0)
             elif "carnival" in text:  # TODO short and long carnival
                 indicates_pattern = True
                 pattern_setting_holder.setting = BlockSetting(
