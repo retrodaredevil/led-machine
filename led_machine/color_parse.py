@@ -49,6 +49,8 @@ def parse_colors(text: str) -> List[Color]:
             result.append(Color.from_bytes(0, 255, 70))
         elif "white" in word:
             result.append(Color.from_bytes(255, 255, 255))
+        elif "dupree" in word:
+            result.append(Color.from_24bit(0xFF1100))
 
     return result
 

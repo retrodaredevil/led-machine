@@ -26,7 +26,9 @@ DIM = 1.0
 
 
 def get_time_multiplier(text) -> Optional[float]:
-    if "sonic" in text:
+    if "hyper" in text:
+        return 4.0
+    elif "sonic" in text:
         return 2.0
     elif "fast" in text:
         return 1.5
@@ -36,8 +38,25 @@ def get_time_multiplier(text) -> Optional[float]:
         return 0.5
     elif "crawl" in text:
         return 0.25
+    elif "limp" in text:
+        return 0.1
     elif "still" in text:
         return 0.001
+    elif "stop" in text:
+        return 0.000000001
+    return None
+
+
+def get_number_before(text: str, target_text: str) -> Optional[int]:
+    split = text.split()
+    previous_element: Optional[str] = None
+    for element in split:
+        if element == target_text:
+            try:
+                return int(previous_element)
+            except ValueError:
+                pass
+        previous_element = element
     return None
 
 
@@ -202,7 +221,13 @@ def main():
             elif "sound" in text and "bar" in text:
                 pattern_setting_holder.setting = CenteredBarSetting(main_setting_holder, volume_percent_getter, 75)
             elif "twinkle" in text:
-                pattern_setting_holder.setting = TwinkleSetting(main_setting_holder, 0.2, 0.7)
+                number = get_number_before(text, "twinkle")  # number will either be None, or we should expect a value between 0 and 100
+                twinkle_percent = 0.5
+                if number is not None and 0 <= number <= 100:
+                    twinkle_percent = number / 100.0
+                min_percent = max(0.0, twinkle_percent ** 2 - 0.1)
+                max_percent = min(1.0, twinkle_percent ** 0.5 + 0.1)
+                pattern_setting_holder.setting = TwinkleSetting(main_setting_holder, min_percent, max_percent)
 
             if "pulse" in text and "loud" in text:
                 dimmer_percent_getter.percent_getter = volume_percent_getter
