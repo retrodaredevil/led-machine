@@ -42,7 +42,7 @@ class TwinkleSetting(AlterPixelSetting):
                 for section_index in range(number_of_sections):
                     pixel_index_start = section_index * self.__class__.SECTION_LENGTH
                     pixel_index_end = pixel_index_start + self.__class__.SECTION_LENGTH  # (Exclusive)
-                    indices = list(range(pixel_index_end, pixel_index_end))
+                    indices = list(range(pixel_index_start, pixel_index_end))
                     random.shuffle(indices)
                     number_to_light_up = random.randint(
                         round(self.__class__.SECTION_LENGTH * self.min_percent_to_light_up),
@@ -73,5 +73,5 @@ class TwinkleSetting(AlterPixelSetting):
             brightness = twinkle.get_brightness(seconds)
             max_brightness = max(max_brightness, brightness)
 
-        return pixel_color * max_brightness
+        return (pixel_color * max_brightness).color()
 
