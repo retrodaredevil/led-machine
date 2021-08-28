@@ -32,7 +32,7 @@ class TwinkleSetting(AlterPixelSetting):
 
     def apply(self, seconds: float, pixels_list: List[List[Optional[Color]]]):
         now = time.time()
-        if self.last_update > now:  # someone changed the speed on us, so just reset and update no matter what
+        if self.last_update is not None and self.last_update > now:  # someone changed the speed on us, so just reset and update no matter what
             self.last_update = None
         if self.last_update is None or self.last_update + 1 < now:
             self.last_update = now
