@@ -51,7 +51,7 @@ def get_number_before(text: str, target_text: str) -> Optional[int]:
     split = text.split()
     previous_element: Optional[str] = None
     for element in split:
-        if element == target_text:
+        if previous_element is not None and element == target_text:
             try:
                 return int(previous_element)
             except ValueError:
