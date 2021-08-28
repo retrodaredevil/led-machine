@@ -15,6 +15,7 @@ from led_machine.rainbow import RainbowSetting
 from led_machine.settings import DimSetting, FrontDimSetting, SolidSetting, LedSettingHolder
 from led_machine.slack import SlackHelper
 from led_machine.stars import StarSetting
+from led_machine.twinkle import TwinkleSetting
 from led_machine.volume import VolumePercentGetter, MeterHelper, HighFrequencyPercentGetter
 
 DIM = 1.0
@@ -200,6 +201,8 @@ def main():
                 pattern_setting_holder.setting = StarSetting(main_setting_holder, 300, 300)
             elif "sound" in text and "bar" in text:
                 pattern_setting_holder.setting = CenteredBarSetting(main_setting_holder, volume_percent_getter, 75)
+            elif "twinkle" in text:
+                pattern_setting_holder.setting = TwinkleSetting(main_setting_holder, 0.2, 0.7)
 
             if "pulse" in text and "loud" in text:
                 dimmer_percent_getter.percent_getter = volume_percent_getter
