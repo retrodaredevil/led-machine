@@ -214,10 +214,10 @@ def main():
                 )
             elif "reverse" in text and "star" in text:
                 indicates_pattern = True
-                pattern_setting_holder.setting = StarSetting(main_setting_holder, 300, 300, reverse=True)
+                pattern_setting_holder.setting = StarSetting(main_setting_holder, 300, 300, pattern_time_multiplier_getter, reverse=True)
             elif "star" in text:
                 indicates_pattern = True
-                pattern_setting_holder.setting = StarSetting(main_setting_holder, 300, 300)
+                pattern_setting_holder.setting = StarSetting(main_setting_holder, 300, 300, pattern_time_multiplier_getter)
             elif "sound" in text and "bar" in text:
                 indicates_pattern = True
                 pattern_setting_holder.setting = CenteredBarSetting(main_setting_holder, volume_percent_getter, 75)
@@ -229,7 +229,7 @@ def main():
                     twinkle_percent = number / 100.0
                 min_percent = max(0.0, twinkle_percent ** 2 - 0.1)
                 max_percent = min(1.0, twinkle_percent ** 0.5 + 0.1)
-                pattern_setting_holder.setting = TwinkleSetting(main_setting_holder, min_percent, max_percent)
+                pattern_setting_holder.setting = TwinkleSetting(main_setting_holder, min_percent, max_percent, pattern_time_multiplier_getter)
 
             if "pulse" in text and "loud" in text:
                 dimmer_percent_getter.percent_getter = volume_percent_getter

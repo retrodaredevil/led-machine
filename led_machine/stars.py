@@ -1,5 +1,5 @@
 from random import randint, uniform
-from typing import Optional, Tuple, List
+from typing import Optional, Tuple, List, Callable
 
 from led_machine.color import Color
 from led_machine.settings import LedSetting, AlterPixelSetting
@@ -22,9 +22,10 @@ class Star:
 
 class StarSetting(AlterPixelSetting):
 
-    def __init__(self, setting: LedSetting, expected_pixels: int, padding: int, reverse: bool = False):
+    def __init__(self, setting: LedSetting, expected_pixels: int, padding: int, time_multiplier_getter: Callable[[], float], reverse: bool = False):
         super().__init__(setting)
         self.reverse = reverse
+        self.time_multiplier_getter = time_multiplier_getter
 
         self.spawn_lower = -padding
         self.spawn_upper = expected_pixels + padding
@@ -61,7 +62,7 @@ class StarSetting(AlterPixelSetting):
         self.last_seconds = seconds
 
         for star in self.stars:
-            star.position += star.velocity * delta
+            star.position += star.velocity * delta * self.time_multiplier_getter()  # instead of altering seconds, just increase the speed by this multiplier
             if star.position > self.spawn_upper:
                 star.position = self.spawn_lower + (star.position - self.spawn_upper)
             elif star.position < self.spawn_lower:

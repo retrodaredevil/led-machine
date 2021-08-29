@@ -1,7 +1,6 @@
 import math
-import time
 import random
-from typing import List, Optional, Tuple, Dict
+from typing import List, Optional, Tuple, Dict, Callable
 
 from led_machine.color import Color, ColorConstants
 from led_machine.settings import AlterPixelSetting, LedSetting
@@ -23,14 +22,16 @@ class Twinkle:
 class TwinkleSetting(AlterPixelSetting):
     SECTION_LENGTH = 20
 
-    def __init__(self, setting: LedSetting, min_percent_to_light_up: float, max_percent_to_light_up: float):
+    def __init__(self, setting: LedSetting, min_percent_to_light_up: float, max_percent_to_light_up: float, time_multiplier_getter: Callable[[], float]):
         super().__init__(setting)
         self.min_percent_to_light_up = min_percent_to_light_up
         self.max_percent_to_light_up = max_percent_to_light_up
+        self.time_multiplier_getter: Callable[[], float] = time_multiplier_getter
         self.twinkle_map: Dict[Tuple[int, int], List[Twinkle]] = {}
         self.last_update: Optional[float] = None
 
     def apply(self, seconds: float, pixels_list: List[List[Optional[Color]]]):
+        seconds = seconds * self.time_multiplier_getter()
         if self.last_update is not None and self.last_update > seconds:  # someone changed the speed on us, so just reset and update no matter what
             self.last_update = None
         if self.last_update is None or self.last_update + 1 < seconds:
