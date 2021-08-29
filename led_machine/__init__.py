@@ -219,8 +219,10 @@ def main():
                 indicates_pattern = True
                 pattern_setting_holder.setting = StarSetting(main_setting_holder, 300, 300)
             elif "sound" in text and "bar" in text:
+                indicates_pattern = True
                 pattern_setting_holder.setting = CenteredBarSetting(main_setting_holder, volume_percent_getter, 75)
             elif "twinkle" in text:
+                indicates_pattern = True
                 number = get_number_before(text, "twinkle")  # number will either be None, or we should expect a value between 0 and 100
                 twinkle_percent = 0.5
                 if number is not None and 0 <= number <= 100:
