@@ -31,6 +31,7 @@ class TwinkleSetting(AlterPixelSetting):
         self.last_update: Optional[float] = None
 
     def apply(self, seconds: float, pixels_list: List[List[Optional[Color]]]):
+        original_seconds = seconds
         seconds = seconds * self.time_multiplier_getter()
         if self.last_update is not None and self.last_update > seconds:  # someone changed the speed on us, so just reset and update no matter what
             self.last_update = None
@@ -58,7 +59,7 @@ class TwinkleSetting(AlterPixelSetting):
                             twinkle_list = []
                             self.twinkle_map[key] = twinkle_list
                         twinkle_list.append(Twinkle(peak_point_seconds, 0.3))
-        super().apply(seconds, pixels_list)
+        super().apply(original_seconds, pixels_list)
 
     def alter(self, seconds: float, list_index: int, pixel_index: int, pixels: List[Optional[Color]], pixel_color: Optional[Color]) -> Optional[Color]:
         key = (list_index, pixel_index)
