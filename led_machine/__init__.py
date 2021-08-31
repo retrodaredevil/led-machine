@@ -5,6 +5,7 @@ from typing import Optional
 
 from led_machine.block import BlockSetting
 from led_machine.centered_bar import CenteredBarSetting
+from led_machine.color import ColorConstants
 from led_machine.color_parse import parse_colors
 from led_machine.fade import FadeSetting
 from led_machine.northern_lights import NorthernLightsSetting
@@ -19,6 +20,9 @@ from led_machine.twinkle import TwinkleSetting
 from led_machine.volume import VolumePercentGetter, MeterHelper, HighFrequencyPercentGetter
 
 DIM = 1.0
+NUMBER_OF_PIXELS = 450
+START_PIXELS_TO_HIDE = 21
+VIRTUAL_PIXELS = NUMBER_OF_PIXELS - START_PIXELS_TO_HIDE
 
 
 # DIM = 0.8 * 0.01  # good for really dim
@@ -65,7 +69,7 @@ def main():
     import neopixel
 
     pixels_list = [
-        neopixel.NeoPixel(board.D18, 450),  # AKA GPIO 18
+        neopixel.NeoPixel(board.D18, NUMBER_OF_PIXELS),  # AKA GPIO 18
     ]
     pixels_list[0].auto_write = False
 
@@ -109,7 +113,10 @@ def main():
 
     main_setting_holder = LedSettingHolder(rainbow_setting)
     pattern_setting_holder = LedSettingHolder(main_setting_holder)
-    setting = DimSetting(pattern_setting_holder, DIM)
+    setting = DimSetting(
+        BlockSetting(pattern_setting_holder, [(ColorConstants.BLACK, START_PIXELS_TO_HIDE), (None, VIRTUAL_PIXELS)], ConstantPercentGetter(0.0), fade=False),
+        DIM
+    )
     dimmer_percent_getter = PercentGetterHolder(ConstantPercentGetter(1.0))
     """A percent getter which stores a percent getter that dynamically controls the brightness of the lights."""
     dim_setting = 0.8
@@ -121,7 +128,7 @@ def main():
             reset = False
             requested_colors = parse_colors(text)
             if "north" in text and len(requested_colors) >= 2:
-                main_setting_holder.setting = NorthernLightsSetting(requested_colors, 300)
+                main_setting_holder.setting = NorthernLightsSetting(requested_colors, VIRTUAL_PIXELS)
             elif "pixel" in text and len(requested_colors) >= 2:
                 main_setting_holder.setting = BlockSetting(
                     None,
@@ -133,7 +140,7 @@ def main():
                 pattern_size = 50
                 percent_getter = color_percent_getter
                 if "long" in text:
-                    pattern_size = 300
+                    pattern_size = VIRTUAL_PIXELS
                 elif "fat" in text:
                     pattern_size = 100
                 elif "tiny" in text:
@@ -206,18 +213,18 @@ def main():
             elif "bounce" in text:
                 indicates_pattern = True
                 pattern_setting_holder.setting = BlockSetting(
-                    main_setting_holder, [(None, 5), ((0, 0, 0), 295)],
+                    main_setting_holder, [(None, 5), ((0, 0, 0), VIRTUAL_PIXELS - 5)],
                     PercentGetterTimeMultiplier(
-                        MultiplierPercentGetter(quick_bounce_percent_getter, 295 / 300),
+                        MultiplierPercentGetter(quick_bounce_percent_getter, (VIRTUAL_PIXELS - 5) / VIRTUAL_PIXELS),
                         pattern_time_multiplier_getter
                     )
                 )
             elif "reverse" in text and "star" in text:
                 indicates_pattern = True
-                pattern_setting_holder.setting = StarSetting(main_setting_holder, 300, 300, pattern_time_multiplier_getter, reverse=True)
+                pattern_setting_holder.setting = StarSetting(main_setting_holder, NUMBER_OF_PIXELS, 300, pattern_time_multiplier_getter, reverse=True)
             elif "star" in text:
                 indicates_pattern = True
-                pattern_setting_holder.setting = StarSetting(main_setting_holder, 300, 300, pattern_time_multiplier_getter)
+                pattern_setting_holder.setting = StarSetting(main_setting_holder, NUMBER_OF_PIXELS, 300, pattern_time_multiplier_getter)
             elif "sound" in text and "bar" in text:
                 indicates_pattern = True
                 pattern_setting_holder.setting = CenteredBarSetting(main_setting_holder, volume_percent_getter, 75)
