@@ -97,3 +97,15 @@ sudo apt install ffmpeg
 ### Common audio issues:
 * https://github.com/Uberi/speech_recognition/issues/444
   * https://github.com/alphacep/vosk-api/issues/383
+
+
+
+### Ideas:
+```
+fast rainbow; slow carnival // effectively two messages being sent in one
+blue green red  // fades between colors
+blue green red | red // half blue green red, half only red
+offset window; blue green red | red // blue green red starts using the "window" offset, then other half is only red
+offset window; blue green red 30% | red // start on "window" offset, first 30% is blue green red, other 70% is only red
+offset window; blue green red 30p | red // start on "window" offset, first 30 pixels is blue green red, other pixels is only red
+```

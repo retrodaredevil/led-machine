@@ -13,7 +13,7 @@ from led_machine.percent import ReversingPercentGetter, BouncePercentGetter, Mul
     PercentGetterHolder, PercentGetterTimeMultiplier, ConstantPercentGetter, SumPercentGetter, SmoothPercentGetter
 from led_machine.police import PoliceSetting
 from led_machine.rainbow import RainbowSetting
-from led_machine.settings import DimSetting, FrontDimSetting, SolidSetting, LedSettingHolder
+from led_machine.settings import DimSetting, FrontDimSetting, SolidSetting, LedSettingHolder, LedSetting
 from led_machine.slack import SlackHelper
 from led_machine.stars import StarSetting
 from led_machine.twinkle import TwinkleSetting
@@ -64,6 +64,88 @@ def get_number_before(text: str, target_text: str) -> Optional[int]:
     return None
 
 
+class LedConstants:
+    default_percent_getter = ReversingPercentGetter(2.0, 10.0 * 60, 2.0)
+    quick_bounce_percent_getter = BouncePercentGetter(12.0)
+    slow_default_percent_getter = ReversingPercentGetter(4.0, 10.0 * 60, 4.0)
+
+
+class LedState:
+    def __init__(self):
+        self.color_time_multiplier = 1.0
+        self.color_time_multiplier_getter = lambda: self.color_time_multiplier
+        # by default, don't "push" the color's percent getter at all
+        self.pattern_time_multiplier = 1.0
+        self.pattern_time_multiplier_getter = lambda: self.pattern_time_multiplier
+
+        # color_percent_getter = SumPercentGetter([LedConstants.default_percent_getter, color_percent_getter_push])
+        self.color_percent_getter = LedConstants.default_percent_getter  # when we had volume stuff, we used to use the above line
+        """The percent getter that should be used for all color settings except for solid"""
+        # self.solid_color_percent_getter = SumPercentGetter([ReversingPercentGetter(10.0, 15.0 * 60, 10.0), color_percent_getter_push])
+        self.solid_color_percent_getter = ReversingPercentGetter(10.0, 15.0 * 60, 10.0)
+        """The percent getter that should be used for solid color settings"""
+        self.rainbow_setting = RainbowSetting(
+            PercentGetterTimeMultiplier(self.color_percent_getter, self.color_time_multiplier_getter), 50
+        )
+        self.bpr_setting = BlockSetting(
+            None,
+            [((0, 0, 255), 2), ((255, 0, 70), 4), ((255, 0, 0), 2)],
+            PercentGetterTimeMultiplier(LedConstants.default_percent_getter, self.color_time_multiplier_getter)
+        )
+        self.police_setting = PoliceSetting(  # there is not really a reason to add color_percent_getter_push to this
+            PercentGetterTimeMultiplier(ReversingPercentGetter(1.0, 60.0 * 60, 1.0), self.color_time_multiplier_getter)
+        )
+
+    def reset(self):
+        self.color_time_multiplier = 1.0
+        self.pattern_time_multiplier = 1.0
+
+    def parse_color_setting(self, text: str) -> Optional[LedSetting]:
+        requested_colors = parse_colors(text)
+        if "north" in text and len(requested_colors) >= 2:
+            return NorthernLightsSetting(requested_colors, VIRTUAL_PIXELS)
+        elif "pixel" in text and len(requested_colors) >= 2:
+            return BlockSetting(
+                None,
+                [(color, 1) for color in requested_colors],
+                PercentGetterTimeMultiplier(self.color_percent_getter, self.color_time_multiplier_getter),
+                fade=False
+            )
+        elif "rainbow" in text or len(requested_colors) >= 2:
+            pattern_size = 50
+            percent_getter = self.color_percent_getter
+            if "double" in text and "long" in text:
+                pattern_size = VIRTUAL_PIXELS * 2
+            elif "long" in text:
+                pattern_size = VIRTUAL_PIXELS
+            elif "fat" in text:
+                pattern_size = 100
+            elif "tiny" in text:
+                pattern_size = 25
+            elif "solid" in text:
+                pattern_size = 30000000000
+                percent_getter = self.solid_color_percent_getter
+
+            if "rainbow" in text:
+                return RainbowSetting(PercentGetterTimeMultiplier(percent_getter, self.color_time_multiplier_getter), pattern_size)
+            else:
+                return FadeSetting(
+                    PercentGetterTimeMultiplier(percent_getter, self.color_time_multiplier_getter),
+                    requested_colors,
+                    pattern_size
+                )
+        elif requested_colors:
+            return SolidSetting(requested_colors[0])
+        elif "bpr" in text:
+            return self.bpr_setting
+        elif "police" in text or "siren" in text:
+            return self.police_setting
+        elif "random":
+            pass  # TODO
+
+        return None
+
+
 def main():
     import board
     import neopixel
@@ -81,37 +163,9 @@ def main():
     slack_channel = config["slack_channel"]
     slack_helper = SlackHelper(slack_bot_token, slack_app_token, slack_channel)
 
-    color_time_multiplier = 1.0
-    color_time_multiplier_getter = lambda: color_time_multiplier
-    # by default, don't "push" the color's percent getter at all
-    color_percent_getter_push = PercentGetterHolder(ConstantPercentGetter(0.0))  # TODO do the same thing for patterns
-    pattern_time_multiplier = 1.0
-    pattern_time_multiplier_getter = lambda: pattern_time_multiplier
+    led_state = LedState()
 
-    default_percent_getter = ReversingPercentGetter(2.0, 10.0 * 60, 2.0)
-    quick_bounce_percent_getter = BouncePercentGetter(12.0)
-    slow_default_percent_getter = ReversingPercentGetter(4.0, 10.0 * 60, 4.0)
-    meter_helper = MeterHelper()
-    volume_percent_getter = SmoothPercentGetter(VolumePercentGetter(meter_helper))
-    high_frequency_percent_getter = HighFrequencyPercentGetter(meter_helper)
-
-    color_percent_getter = SumPercentGetter([default_percent_getter, color_percent_getter_push])
-    """The percent getter that should be used for all color settings except for solid"""
-    solid_color_percent_getter = SumPercentGetter([ReversingPercentGetter(10.0, 15.0 * 60, 10.0), color_percent_getter_push])
-    """The percent getter that should be used for solid color settings"""
-    rainbow_setting = RainbowSetting(
-        PercentGetterTimeMultiplier(color_percent_getter, color_time_multiplier_getter), 50
-    )
-    bpr_setting = BlockSetting(
-        None,
-        [((0, 0, 255), 2), ((255, 0, 70), 4), ((255, 0, 0), 2)],
-        PercentGetterTimeMultiplier(SumPercentGetter([default_percent_getter, color_percent_getter_push]), color_time_multiplier_getter)
-    )
-    police_setting = PoliceSetting(  # there is not really a reason to add color_percent_getter_push to this
-        PercentGetterTimeMultiplier(ReversingPercentGetter(1.0, 60.0 * 60, 1.0), color_time_multiplier_getter)
-    )
-
-    main_setting_holder = LedSettingHolder(rainbow_setting)
+    main_setting_holder = LedSettingHolder(led_state.rainbow_setting)
     pattern_setting_holder = LedSettingHolder(main_setting_holder)
     setting = DimSetting(
         BlockSetting(pattern_setting_holder, [(ColorConstants.BLACK, START_PIXELS_TO_HIDE), (None, VIRTUAL_PIXELS)], ConstantPercentGetter(0.0), fade=False),
@@ -126,108 +180,69 @@ def main():
             text: str = message["text"].lower()
             print(f"Got text: {repr(text)}")
             reset = False
-            requested_colors = parse_colors(text)
-            if "north" in text and len(requested_colors) >= 2:
-                main_setting_holder.setting = NorthernLightsSetting(requested_colors, VIRTUAL_PIXELS)
-            elif "pixel" in text and len(requested_colors) >= 2:
-                main_setting_holder.setting = BlockSetting(
-                    None,
-                    [(color, 1) for color in requested_colors],
-                    PercentGetterTimeMultiplier(color_percent_getter, color_time_multiplier_getter),
-                    fade=False
-                )
-            elif "rainbow" in text or len(requested_colors) >= 2:
-                pattern_size = 50
-                percent_getter = color_percent_getter
-                if "long" in text:
-                    pattern_size = VIRTUAL_PIXELS
-                elif "fat" in text:
-                    pattern_size = 100
-                elif "tiny" in text:
-                    pattern_size = 25
-                elif "solid" in text:
-                    pattern_size = 30000000000
-                    percent_getter = solid_color_percent_getter
 
-                if "rainbow" in text:
-                    main_setting_holder.setting = RainbowSetting(PercentGetterTimeMultiplier(percent_getter, color_time_multiplier_getter), pattern_size)
-                else:
-                    main_setting_holder.setting = FadeSetting(
-                        PercentGetterTimeMultiplier(percent_getter, color_time_multiplier_getter),
-                        requested_colors,
-                        pattern_size
-                    )
-
-            elif requested_colors:
-                main_setting_holder.setting = SolidSetting(requested_colors[0])
+            requested_color_setting = led_state.parse_color_setting(text)
+            if requested_color_setting is not None:
+                main_setting_holder.setting = requested_color_setting
             elif "off" in text:
-                main_setting_holder.setting = SolidSetting((0, 0, 0))
                 reset = True
-            elif "bpr" in text:
-                main_setting_holder.setting = bpr_setting
-            elif "police" in text or "siren" in text:
-                main_setting_holder.setting = police_setting
+                main_setting_holder.setting = SolidSetting((0, 0, 0))
 
-            if "skyline" in text or "sky line" in text or "sky-line" in text:
+            if "bright" in text:
+                dim_setting = 1.0
+            elif "normal" in text:
+                dim_setting = 0.8
+            elif "dim" in text:
+                dim_setting = 0.3 * 0.8
+            elif "dark" in text:
+                dim_setting = 0.07 * 0.8
+            elif "sleep" in text:
+                dim_setting = 0.01 * 0.8
+            elif "skyline" in text or "sky line" in text or "sky-line" in text:
                 dim_setting = 0.005
             else:
-                unknown = False
-                if "bright" in text:
-                    dim_setting = 1.0
-                elif "normal" in text:
+                if reset:
                     dim_setting = 0.8
-                elif "dim" in text:
-                    dim_setting = 0.3 * 0.8
-                elif "dark" in text:
-                    dim_setting = 0.07 * 0.8
-                elif "sleep" in text:
-                    dim_setting = 0.01 * 0.8
-                else:
-                    if reset:
-                        dim_setting = 0.8
-                    unknown = True
-                if not unknown:
-                    # rear_dimmer.dim = 1.0
-                    pass
 
             indicates_pattern = "pattern" in text
             # TODO pulse in and out
             if reset or "reset" in text:
                 pattern_setting_holder.setting = main_setting_holder
-                color_time_multiplier = 1.0
-                pattern_time_multiplier = 1.0
+                led_state.reset()
                 dimmer_percent_getter.percent_getter = ConstantPercentGetter(1.0)
-                color_percent_getter_push.percent_getter = ConstantPercentGetter(0.0)
-            elif "carnival" in text:  # TODO short and long carnival
+            elif "carnival" in text:
                 indicates_pattern = True
+                block_list = [(None, 5), ((0, 0, 0), 3)]
+                if "short" in text:
+                    block_list = [(None, 3), ((0, 0, 0), 2)]
+                elif "long" in text:
+                    block_list = [(None, 10), ((0, 0, 0), 6)]
+
                 pattern_setting_holder.setting = BlockSetting(
-                    main_setting_holder, [(None, 5), ((0, 0, 0), 3)],
-                    PercentGetterTimeMultiplier(slow_default_percent_getter, pattern_time_multiplier_getter)
+                    main_setting_holder, block_list,
+                    PercentGetterTimeMultiplier(LedConstants.slow_default_percent_getter, led_state.pattern_time_multiplier_getter)
                 )
             elif "single" in text:
                 indicates_pattern = True
                 pattern_setting_holder.setting = BlockSetting(
-                    main_setting_holder, [(None, 5), ((0, 0, 0), 295)],
-                    PercentGetterTimeMultiplier(slow_default_percent_getter, pattern_time_multiplier_getter)
+                    main_setting_holder, [(None, 5), ((0, 0, 0), VIRTUAL_PIXELS)],
+                    PercentGetterTimeMultiplier(LedConstants.slow_default_percent_getter, led_state.pattern_time_multiplier_getter)
                 )
             elif "bounce" in text:
                 indicates_pattern = True
                 pattern_setting_holder.setting = BlockSetting(
                     main_setting_holder, [(None, 5), ((0, 0, 0), VIRTUAL_PIXELS - 5)],
                     PercentGetterTimeMultiplier(
-                        MultiplierPercentGetter(quick_bounce_percent_getter, (VIRTUAL_PIXELS - 5) / VIRTUAL_PIXELS),
-                        pattern_time_multiplier_getter
+                        MultiplierPercentGetter(LedConstants.quick_bounce_percent_getter, (VIRTUAL_PIXELS - 5) / VIRTUAL_PIXELS),
+                        led_state.pattern_time_multiplier_getter
                     )
                 )
             elif "reverse" in text and "star" in text:
                 indicates_pattern = True
-                pattern_setting_holder.setting = StarSetting(main_setting_holder, NUMBER_OF_PIXELS, 300, pattern_time_multiplier_getter, reverse=True)
+                pattern_setting_holder.setting = StarSetting(main_setting_holder, NUMBER_OF_PIXELS, 300, led_state.pattern_time_multiplier_getter, reverse=True)
             elif "star" in text:
                 indicates_pattern = True
-                pattern_setting_holder.setting = StarSetting(main_setting_holder, NUMBER_OF_PIXELS, 300, pattern_time_multiplier_getter)
-            elif "sound" in text and "bar" in text:
-                indicates_pattern = True
-                pattern_setting_holder.setting = CenteredBarSetting(main_setting_holder, volume_percent_getter, 75)
+                pattern_setting_holder.setting = StarSetting(main_setting_holder, NUMBER_OF_PIXELS, 300, led_state.pattern_time_multiplier_getter)
             elif "twinkle" in text:
                 indicates_pattern = True
                 number = get_number_before(text, "twinkle")  # number will either be None, or we should expect a value between 0 and 100
@@ -236,34 +251,16 @@ def main():
                     twinkle_percent = number / 100.0
                 min_percent = max(0.0, twinkle_percent ** 2 - 0.1)
                 max_percent = min(1.0, twinkle_percent ** 0.5 + 0.1)
-                pattern_setting_holder.setting = TwinkleSetting(main_setting_holder, min_percent, max_percent, pattern_time_multiplier_getter)
-
-            if "pulse" in text and "loud" in text:
-                dimmer_percent_getter.percent_getter = volume_percent_getter
-            elif "pulse" in text and ("freq" in text or "pitch" in text):
-                dimmer_percent_getter.percent_getter = high_frequency_percent_getter
-            elif "pulse" in text:
-                pass  # TODO pulse
+                pattern_setting_holder.setting = TwinkleSetting(main_setting_holder, min_percent, max_percent, led_state.pattern_time_multiplier_getter)
 
             time_multiplier = get_time_multiplier(text)
             if time_multiplier is not None:
                 if indicates_pattern:
                     # Pattern speed
-                    pattern_time_multiplier = time_multiplier
+                    led_state.pattern_time_multiplier = time_multiplier
                 else:
                     # Color speed
-                    color_time_multiplier = time_multiplier
-            if "push" in text:
-                if "loud" in text:
-                    if indicates_pattern:
-                        pass
-                    else:
-                        color_percent_getter_push.percent_getter = volume_percent_getter
-                elif "freq" in text or "pitch" in text:
-                    if indicates_pattern:
-                        pass
-                    else:
-                        color_percent_getter_push.percent_getter = high_frequency_percent_getter
+                    led_state.color_time_multiplier = time_multiplier
 
         seconds = time.time()
 
