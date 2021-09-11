@@ -9,11 +9,12 @@ from led_machine.color import ColorConstants
 from led_machine.color_parse import parse_colors
 from led_machine.fade import FadeSetting
 from led_machine.northern_lights import NorthernLightsSetting
+from led_machine.partition import PartitionSetting
 from led_machine.percent import ReversingPercentGetter, BouncePercentGetter, MultiplierPercentGetter, \
     PercentGetterHolder, PercentGetterTimeMultiplier, ConstantPercentGetter, SumPercentGetter, SmoothPercentGetter
 from led_machine.police import PoliceSetting
 from led_machine.rainbow import RainbowSetting
-from led_machine.settings import DimSetting, FrontDimSetting, SolidSetting, LedSettingHolder, LedSetting
+from led_machine.settings import DimSetting, FrontDimSetting, SolidSetting, LedSettingHolder, LedSetting, DoNothingLedSetting
 from led_machine.slack import SlackHelper
 from led_machine.stars import StarSetting
 from led_machine.twinkle import TwinkleSetting
@@ -72,7 +73,7 @@ class LedConstants:
     default_percent_getter = ReversingPercentGetter(2.0, 10.0 * 60, 2.0)
     quick_bounce_percent_getter = BouncePercentGetter(12.0)
     slow_default_percent_getter = ReversingPercentGetter(4.0, 10.0 * 60, 4.0)
-    # josh_lamp_block_list = [(None, START_PIXELS_TO_HIDE), (ColorConstants.BLACK)]
+    josh_lamp_partition_list = [(START_PIXELS_TO_HIDE, 17), (NUMBER_OF_PIXELS - 18, 18)]
 
 
 class LedState:
@@ -98,7 +99,7 @@ class LedState:
             [((0, 0, 255), 2), ((255, 0, 70), 4), ((255, 0, 0), 2)],
             PercentGetterTimeMultiplier(LedConstants.default_percent_getter, self.color_time_multiplier_getter)
         )
-        self.police_setting = PoliceSetting(  # there is not really a reason to add color_percent_getter_push to this
+        self.police_setting = PoliceSetting(
             PercentGetterTimeMultiplier(ReversingPercentGetter(1.0, 60.0 * 60, 1.0), self.color_time_multiplier_getter)
         )
 
@@ -107,6 +108,10 @@ class LedState:
         self.pattern_time_multiplier = 1.0
 
     def parse_color_setting(self, text: str) -> Optional[LedSetting]:
+        """
+        Does NOT mutate this. This is a member function because the returned LedSetting may contain references to the state defined in this class,
+        so mutating the state of this instance could affect the different settings returned by this method
+        """
         requested_colors = parse_colors(text)
         if "north" in text and len(requested_colors) >= 2:
             return NorthernLightsSetting(requested_colors, VIRTUAL_PIXELS)
@@ -171,10 +176,14 @@ def main():
 
     led_state = LedState()
 
+    josh_lamp_setting_holder = LedSettingHolder(DoNothingLedSetting())  # "josh lamp" is hard coded into the code (eventually we'll refactor)
     main_setting_holder = LedSettingHolder(led_state.rainbow_setting)
     pattern_setting_holder = LedSettingHolder(main_setting_holder)
     setting = DimSetting(
-        BlockSetting(pattern_setting_holder, [(ColorConstants.BLACK, START_PIXELS_TO_HIDE), (None, VIRTUAL_PIXELS)], ConstantPercentGetter(0.0), fade=False),
+        PartitionSetting(
+            BlockSetting(pattern_setting_holder, [(ColorConstants.BLACK, START_PIXELS_TO_HIDE), (None, VIRTUAL_PIXELS)], ConstantPercentGetter(0.0), fade=False),
+            [(josh_lamp_setting_holder, LedConstants.josh_lamp_partition_list)]
+        ),
         DIM
     )
     dimmer_percent_getter = PercentGetterHolder(ConstantPercentGetter(1.0))
@@ -188,7 +197,13 @@ def main():
             reset = False
 
             requested_color_setting = led_state.parse_color_setting(text)
-            if requested_color_setting is not None:
+            if "lamp" in text:
+                # if this message is a "lamp" message, then only apply request_color_setting to a particular partition of pixels (or default white)
+                turn_off = "off" in text
+                setting_to_use = DoNothingLedSetting() if turn_off else (requested_color_setting or SolidSetting(ColorConstants.WHITE))
+                if "josh" in text:  # hardcode josh lamp value
+                    josh_lamp_setting_holder.setting = setting_to_use
+            elif requested_color_setting is not None:
                 main_setting_holder.setting = requested_color_setting
             elif "off" in text:
                 reset = True

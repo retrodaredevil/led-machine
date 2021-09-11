@@ -11,6 +11,11 @@ class LedSetting(ABC):
         pass
 
 
+class DoNothingLedSetting(LedSetting):
+    def apply(self, seconds: float, pixels_list: List[List[Optional[Color]]]):
+        pass
+
+
 class LedSettingHolder(LedSetting):
     def __init__(self, setting: LedSetting):
         self.setting: LedSetting = setting
