@@ -73,13 +73,18 @@ class LedConstants:
     default_percent_getter = ReversingPercentGetter(2.0, 10.0 * 60, 2.0)
     quick_bounce_percent_getter = BouncePercentGetter(12.0)
     slow_default_percent_getter = ReversingPercentGetter(4.0, 10.0 * 60, 4.0)
-    josh_lamp_partition_list = [(START_PIXELS_TO_HIDE, 17), (NUMBER_OF_PIXELS - 18, 18)]
+    josh_lamp_partition_list = [(START_PIXELS_TO_HIDE, 17), (NUMBER_OF_PIXELS - 19, 19)]
 
 
 class LedState:
     def __init__(self):
+        # Values that are directly mutated
         self.color_time_multiplier = 1.0
         self.pattern_time_multiplier = 1.0
+
+        # Values whose data is mutated
+        self.main_setting_holder = LedSettingHolder(DoNothingLedSetting())  # default to the "do nothing" setting.
+        self.pattern_setting_holder = LedSettingHolder(self.main_setting_holder)
 
         # Values that remain unchanged, but are based on the state defined above
         self.color_time_multiplier_getter = lambda: self.color_time_multiplier
@@ -106,6 +111,7 @@ class LedState:
     def reset(self):
         self.color_time_multiplier = 1.0
         self.pattern_time_multiplier = 1.0
+        self.pattern_setting_holder.setting = self.main_setting_holder
 
     def parse_color_setting(self, text: str) -> Optional[LedSetting]:
         """
@@ -157,6 +163,88 @@ class LedState:
         return None
 
 
+class MessageContext:
+    def __init__(self):
+        self.reset: bool = False
+
+
+def handle_message(text: str, led_state: LedState, is_lamp: bool, context: MessageContext):
+    requested_color_setting = led_state.parse_color_setting(text)
+
+    is_off = "off" in text
+
+    if requested_color_setting is None and is_lamp and not is_off:
+        requested_color_setting = ColorConstants.WHITE
+
+    if requested_color_setting is not None:
+        led_state.main_setting_holder.setting = requested_color_setting
+    elif is_off:
+        context.reset = True
+        if is_lamp:
+            led_state.main_setting_holder.setting = DoNothingLedSetting()
+        else:
+            led_state.main_setting_holder.setting = SolidSetting(ColorConstants.BLACK)
+
+    indicates_pattern = "pattern" in text
+    # TODO pulse in and out
+    if context.reset or "reset" in text:
+        led_state.pattern_setting_holder.setting = led_state.main_setting_holder
+        led_state.reset()
+    elif "carnival" in text:
+        indicates_pattern = True
+        block_list = [(None, 5), ((0, 0, 0), 3)]
+        if "short" in text:
+            block_list = [(None, 3), ((0, 0, 0), 2)]
+        elif "long" in text:
+            block_list = [(None, 10), ((0, 0, 0), 6)]
+
+        led_state.pattern_setting_holder.setting = BlockSetting(
+            led_state.main_setting_holder, block_list,
+            PercentGetterTimeMultiplier(LedConstants.slow_default_percent_getter, led_state.pattern_time_multiplier_getter)
+        )
+    elif "single" in text:
+        indicates_pattern = True
+        led_state.pattern_setting_holder.setting = BlockSetting(
+            led_state.main_setting_holder, [(None, 5), ((0, 0, 0), VIRTUAL_PIXELS)],
+            PercentGetterTimeMultiplier(LedConstants.slow_default_percent_getter, led_state.pattern_time_multiplier_getter)
+        )
+    elif "bounce" in text:
+        indicates_pattern = True
+        led_state.pattern_setting_holder.setting = BlockSetting(
+            led_state.main_setting_holder, [(None, 5), ((0, 0, 0), VIRTUAL_PIXELS - 5)],
+            PercentGetterTimeMultiplier(
+                MultiplierPercentGetter(LedConstants.quick_bounce_percent_getter, (VIRTUAL_PIXELS - 5) / VIRTUAL_PIXELS),
+                led_state.pattern_time_multiplier_getter
+            )
+        )
+    elif "reverse" in text and "star" in text:
+        indicates_pattern = True
+        led_state.pattern_setting_holder.setting = StarSetting(
+            led_state.main_setting_holder, NUMBER_OF_PIXELS, 300, led_state.pattern_time_multiplier_getter, reverse=True
+        )
+    elif "star" in text:
+        indicates_pattern = True
+        led_state.pattern_setting_holder.setting = StarSetting(led_state.main_setting_holder, NUMBER_OF_PIXELS, 300, led_state.pattern_time_multiplier_getter)
+    elif "twinkle" in text:
+        indicates_pattern = True
+        number: Optional[float] = get_number_before(text, "twinkle")  # number will either be None, or we should expect a value between 0 and 100
+        twinkle_percent = 0.5
+        if number is not None and 0 <= number <= 100:
+            twinkle_percent = number / 100.0
+        min_percent = max(0.0, twinkle_percent ** 2 - 0.1)
+        max_percent = min(1.0, twinkle_percent ** 0.5 + 0.1)
+        led_state.pattern_setting_holder.setting = TwinkleSetting(led_state.main_setting_holder, min_percent, max_percent, led_state.pattern_time_multiplier_getter)
+
+    time_multiplier = get_time_multiplier(text)
+    if time_multiplier is not None:
+        if indicates_pattern:
+            # Pattern speed
+            led_state.pattern_time_multiplier = time_multiplier
+        else:
+            # Color speed
+            led_state.color_time_multiplier = time_multiplier
+
+
 def main():
     import board
     import neopixel
@@ -174,40 +262,32 @@ def main():
     slack_channel = config["slack_channel"]
     slack_helper = SlackHelper(slack_bot_token, slack_app_token, slack_channel)
 
-    led_state = LedState()
+    main_led_state = LedState()
 
-    josh_lamp_setting_holder = LedSettingHolder(DoNothingLedSetting())  # "josh lamp" is hard coded into the code (eventually we'll refactor)
-    main_setting_holder = LedSettingHolder(led_state.rainbow_setting)
-    pattern_setting_holder = LedSettingHolder(main_setting_holder)
+    josh_lamp_led_state = LedState()
     setting = DimSetting(
         PartitionSetting(
-            BlockSetting(pattern_setting_holder, [(ColorConstants.BLACK, START_PIXELS_TO_HIDE), (None, VIRTUAL_PIXELS)], ConstantPercentGetter(0.0), fade=False),
-            [(josh_lamp_setting_holder, LedConstants.josh_lamp_partition_list)]
+            BlockSetting(main_led_state.pattern_setting_holder, [(ColorConstants.BLACK, START_PIXELS_TO_HIDE), (None, VIRTUAL_PIXELS)], ConstantPercentGetter(0.0), fade=False),
+            [(josh_lamp_led_state.pattern_setting_holder, LedConstants.josh_lamp_partition_list)]
         ),
         DIM
     )
-    dimmer_percent_getter = PercentGetterHolder(ConstantPercentGetter(1.0))
-    """A percent getter which stores a percent getter that dynamically controls the brightness of the lights."""
+    # dimmer_percent_getter = PercentGetterHolder(ConstantPercentGetter(1.0))
+    # """A percent getter which stores a percent getter that dynamically controls the brightness of the lights."""
     dim_setting = 0.8
     """A value that is changed when requested by the user"""
     while True:
         for message in slack_helper.new_messages():
             text: str = message["text"].lower()
             print(f"Got text: {repr(text)}")
-            reset = False
+            context = MessageContext()
 
-            requested_color_setting = led_state.parse_color_setting(text)
-            if "lamp" in text:
-                # if this message is a "lamp" message, then only apply request_color_setting to a particular partition of pixels (or default white)
-                turn_off = "off" in text
-                setting_to_use = DoNothingLedSetting() if turn_off else (requested_color_setting or SolidSetting(ColorConstants.WHITE))
-                if "josh" in text:  # hardcode josh lamp value
-                    josh_lamp_setting_holder.setting = setting_to_use
-            elif requested_color_setting is not None:
-                main_setting_holder.setting = requested_color_setting
-            elif "off" in text:
-                reset = True
-                main_setting_holder.setting = SolidSetting((0, 0, 0))
+            used_led_state = main_led_state
+            is_lamp = "lamp" in text
+            if is_lamp:
+                if "josh" in text:
+                    used_led_state = josh_lamp_led_state
+            handle_message(text, used_led_state, is_lamp, context)
 
             if "bright" in text:
                 dim_setting = 1.0
@@ -222,70 +302,14 @@ def main():
             elif "skyline" in text or "sky line" in text or "sky-line" in text:
                 dim_setting = 0.005
             else:
-                if reset:
+                if context.reset and not is_lamp:
                     dim_setting = 0.8
 
-            indicates_pattern = "pattern" in text
-            # TODO pulse in and out
-            if reset or "reset" in text:
-                pattern_setting_holder.setting = main_setting_holder
-                led_state.reset()
-                dimmer_percent_getter.percent_getter = ConstantPercentGetter(1.0)
-            elif "carnival" in text:
-                indicates_pattern = True
-                block_list = [(None, 5), ((0, 0, 0), 3)]
-                if "short" in text:
-                    block_list = [(None, 3), ((0, 0, 0), 2)]
-                elif "long" in text:
-                    block_list = [(None, 10), ((0, 0, 0), 6)]
-
-                pattern_setting_holder.setting = BlockSetting(
-                    main_setting_holder, block_list,
-                    PercentGetterTimeMultiplier(LedConstants.slow_default_percent_getter, led_state.pattern_time_multiplier_getter)
-                )
-            elif "single" in text:
-                indicates_pattern = True
-                pattern_setting_holder.setting = BlockSetting(
-                    main_setting_holder, [(None, 5), ((0, 0, 0), VIRTUAL_PIXELS)],
-                    PercentGetterTimeMultiplier(LedConstants.slow_default_percent_getter, led_state.pattern_time_multiplier_getter)
-                )
-            elif "bounce" in text:
-                indicates_pattern = True
-                pattern_setting_holder.setting = BlockSetting(
-                    main_setting_holder, [(None, 5), ((0, 0, 0), VIRTUAL_PIXELS - 5)],
-                    PercentGetterTimeMultiplier(
-                        MultiplierPercentGetter(LedConstants.quick_bounce_percent_getter, (VIRTUAL_PIXELS - 5) / VIRTUAL_PIXELS),
-                        led_state.pattern_time_multiplier_getter
-                    )
-                )
-            elif "reverse" in text and "star" in text:
-                indicates_pattern = True
-                pattern_setting_holder.setting = StarSetting(main_setting_holder, NUMBER_OF_PIXELS, 300, led_state.pattern_time_multiplier_getter, reverse=True)
-            elif "star" in text:
-                indicates_pattern = True
-                pattern_setting_holder.setting = StarSetting(main_setting_holder, NUMBER_OF_PIXELS, 300, led_state.pattern_time_multiplier_getter)
-            elif "twinkle" in text:
-                indicates_pattern = True
-                number: Optional[float] = get_number_before(text, "twinkle")  # number will either be None, or we should expect a value between 0 and 100
-                twinkle_percent = 0.5
-                if number is not None and 0 <= number <= 100:
-                    twinkle_percent = number / 100.0
-                min_percent = max(0.0, twinkle_percent ** 2 - 0.1)
-                max_percent = min(1.0, twinkle_percent ** 0.5 + 0.1)
-                pattern_setting_holder.setting = TwinkleSetting(main_setting_holder, min_percent, max_percent, led_state.pattern_time_multiplier_getter)
-
-            time_multiplier = get_time_multiplier(text)
-            if time_multiplier is not None:
-                if indicates_pattern:
-                    # Pattern speed
-                    led_state.pattern_time_multiplier = time_multiplier
-                else:
-                    # Color speed
-                    led_state.color_time_multiplier = time_multiplier
 
         seconds = time.time()
 
-        setting.dim = DIM * dim_setting * dimmer_percent_getter.get_percent(seconds)
+        # setting.dim = DIM * dim_setting * dimmer_percent_getter.get_percent(seconds)
+        setting.dim = DIM * dim_setting
         setting.apply(seconds, pixels_list)
         for pixels in pixels_list:
             pixels.show()
