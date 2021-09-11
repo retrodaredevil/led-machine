@@ -107,4 +107,5 @@ class Color(RawColor):
 
 class ColorConstants:
     BLACK = Color(0.0, 0.0, 0.0)
+    WHITE = Color(1.0, 1.0, 1.0)
 

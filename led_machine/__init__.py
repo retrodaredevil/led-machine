@@ -29,6 +29,11 @@ VIRTUAL_PIXELS = NUMBER_OF_PIXELS - START_PIXELS_TO_HIDE
 
 
 def get_time_multiplier(text) -> Optional[float]:
+
+    speed = get_number_before(text, "speed")
+    if speed is not None:
+        return speed
+
     if "hyper" in text:
         return 4.0
     elif "sonic" in text:
@@ -50,13 +55,13 @@ def get_time_multiplier(text) -> Optional[float]:
     return None
 
 
-def get_number_before(text: str, target_text: str) -> Optional[int]:
+def get_number_before(text: str, target_text: str) -> Optional[float]:
     split = text.split()
     previous_element: Optional[str] = None
     for element in split:
         if previous_element is not None and element == target_text:
             try:
-                return int(previous_element)
+                return float(previous_element)
             except ValueError:
                 pass
         previous_element = element
@@ -67,14 +72,16 @@ class LedConstants:
     default_percent_getter = ReversingPercentGetter(2.0, 10.0 * 60, 2.0)
     quick_bounce_percent_getter = BouncePercentGetter(12.0)
     slow_default_percent_getter = ReversingPercentGetter(4.0, 10.0 * 60, 4.0)
+    # josh_lamp_block_list = [(None, START_PIXELS_TO_HIDE), (ColorConstants.BLACK)]
 
 
 class LedState:
     def __init__(self):
         self.color_time_multiplier = 1.0
-        self.color_time_multiplier_getter = lambda: self.color_time_multiplier
-        # by default, don't "push" the color's percent getter at all
         self.pattern_time_multiplier = 1.0
+
+        # Values that remain unchanged, but are based on the state defined above
+        self.color_time_multiplier_getter = lambda: self.color_time_multiplier
         self.pattern_time_multiplier_getter = lambda: self.pattern_time_multiplier
 
         # color_percent_getter = SumPercentGetter([LedConstants.default_percent_getter, color_percent_getter_push])
@@ -244,7 +251,7 @@ def main():
                 pattern_setting_holder.setting = StarSetting(main_setting_holder, NUMBER_OF_PIXELS, 300, led_state.pattern_time_multiplier_getter)
             elif "twinkle" in text:
                 indicates_pattern = True
-                number = get_number_before(text, "twinkle")  # number will either be None, or we should expect a value between 0 and 100
+                number: Optional[float] = get_number_before(text, "twinkle")  # number will either be None, or we should expect a value between 0 and 100
                 twinkle_percent = 0.5
                 if number is not None and 0 <= number <= 100:
                     twinkle_percent = number / 100.0
