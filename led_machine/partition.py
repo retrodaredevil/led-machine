@@ -34,6 +34,7 @@ class PartitionSetting(LedSetting):
 
                 override_color: Optional[Color] = None
                 if override_setting is not None and last_override_setting != override_setting:
+                    last_override_setting = override_setting
                     clear_pixels_list(pixels_list_partition_copy)
                     override_setting.apply(seconds, pixels_list_partition_copy)  # This will affect pixels_partition_copy
                     override_color = pixels_partition_copy[i]
