@@ -174,7 +174,7 @@ def handle_message(text: str, led_state: LedState, is_lamp: bool, context: Messa
     is_off = "off" in text
 
     if requested_color_setting is None and is_lamp and not is_off:
-        requested_color_setting = ColorConstants.WHITE
+        requested_color_setting = SolidSetting(ColorConstants.WHITE)
 
     if requested_color_setting is not None:
         led_state.main_setting_holder.setting = requested_color_setting
