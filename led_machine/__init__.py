@@ -17,7 +17,6 @@ from led_machine.settings import DimSetting, FrontDimSetting, SolidSetting, LedS
 from led_machine.slack import SlackHelper
 from led_machine.stars import StarSetting
 from led_machine.twinkle import TwinkleSetting
-from led_machine.volume import VolumePercentGetter, MeterHelper, HighFrequencyPercentGetter
 
 DIM = 1.0
 NUMBER_OF_PIXELS = 450
