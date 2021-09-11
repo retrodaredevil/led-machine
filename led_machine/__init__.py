@@ -263,6 +263,7 @@ def main():
     slack_helper = SlackHelper(slack_bot_token, slack_app_token, slack_channel)
 
     main_led_state = LedState()
+    main_led_state.main_setting_holder.setting = main_led_state.rainbow_setting
 
     josh_lamp_led_state = LedState()
     setting = DimSetting(
