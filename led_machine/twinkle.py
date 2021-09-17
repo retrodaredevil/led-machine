@@ -62,6 +62,8 @@ class TwinkleSetting(AlterPixelSetting):
         super().apply(original_seconds, pixels_list)
 
     def alter(self, seconds: float, list_index: int, pixel_index: int, pixels: List[Optional[Color]], pixel_color: Optional[Color]) -> Optional[Color]:
+        if pixel_color is None:
+            return None
         seconds = seconds * self.time_multiplier_getter()
         key = (list_index, pixel_index)
         twinkle_list = self.twinkle_map.get(key)
