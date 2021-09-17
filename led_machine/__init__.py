@@ -23,6 +23,10 @@ DIM = 1.0
 NUMBER_OF_PIXELS = 450
 START_PIXELS_TO_HIDE = 21
 VIRTUAL_PIXELS = NUMBER_OF_PIXELS - START_PIXELS_TO_HIDE
+PIXEL_OFFSETS = {
+    "side_half": 15,
+    "front_back": 130
+}
 
 
 # DIM = 0.8 * 0.01  # good for really dim
@@ -53,6 +57,16 @@ def get_time_multiplier(text) -> Optional[float]:
         return 0.001
     elif "stop" in text:
         return 0.000000001
+    return None
+
+
+def get_string_after(text: str, target_text: str) -> Optional[str]:
+    split = text.split()
+    previous_element: Optional[str] = None
+    for element in split:
+        if previous_element == target_text:
+            return element
+        previous_element = element
     return None
 
 
@@ -169,20 +183,48 @@ class MessageContext:
 
 
 def handle_message(text: str, led_state: LedState, is_lamp: bool, context: MessageContext):
-    requested_color_setting = led_state.parse_color_setting(text)
+    split_text = text.split("|")
+    requested_settings = [setting for setting in (led_state.parse_color_setting(split) for split in split_text) if setting is not None]
 
     is_off = "off" in text
 
-    if requested_color_setting is None and is_lamp and not is_off:
-        requested_color_setting = SolidSetting(ColorConstants.WHITE)
+    if not requested_settings and is_lamp and not is_off:
+        requested_settings = [SolidSetting(ColorConstants.WHITE)]
 
-    if requested_color_setting is not None:
-        led_state.main_setting_holder.setting = requested_color_setting
+    if not requested_settings:
+        if len(requested_settings) == 1:
+            led_state.main_setting_holder.setting = requested_settings[0]
+        else:
+            offset_string = get_string_after(text, "offset")
+            offset_pixels = PIXEL_OFFSETS.get(offset_string) or PIXEL_OFFSETS["side_half"]
+            pixels_per_partition = VIRTUAL_PIXELS // len(requested_settings)
+            extra_pixels = VIRTUAL_PIXELS % len(requested_settings)
+            start_pixel = START_PIXELS_TO_HIDE + offset_pixels
+            override_list = []
+            for i, requested_setting in enumerate(requested_settings):
+                length = pixels_per_partition + (1 if i < extra_pixels else 0)
+                end_pixel = start_pixel + length - 1  # The index of the last pixel in this partition
+                partitions = []
+                if end_pixel >= NUMBER_OF_PIXELS:
+                    end_length = NUMBER_OF_PIXELS - start_pixel
+                    leftover_length = length - end_length
+                    partitions.append((start_pixel, end_length))
+                    partitions.append((START_PIXELS_TO_HIDE, leftover_length))
+                    start_pixel = START_PIXELS_TO_HIDE + leftover_length
+                else:
+                    partitions.append((start_pixel, length))
+                    start_pixel += length
+                    if start_pixel >= NUMBER_OF_PIXELS:
+                        start_pixel -= NUMBER_OF_PIXELS
+                        start_pixel += START_PIXELS_TO_HIDE
+                override_list.append((requested_setting, partitions))
+
+            led_state.main_setting_holder.setting = PartitionSetting(None, override_list)
     elif is_off:
-        context.reset = True
         if is_lamp:
             led_state.main_setting_holder.setting = DoNothingLedSetting()
         else:
+            context.reset = True
             led_state.main_setting_holder.setting = SolidSetting(ColorConstants.BLACK)
 
     indicates_pattern = "pattern" in text

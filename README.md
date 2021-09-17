@@ -49,10 +49,9 @@ mypy led_machine
 ```
 
 ```shell
-pi@raspberrypi:~/led-machine $ sudo systemctl daemon-reload
-pi@raspberrypi:~/led-machine $ sudo systemctl enable led-machine
-Created symlink /etc/systemd/system/multi-user.target.wants/led-machine.service → /etc/systemd/system/led-machine.service.
-pi@raspberrypi:~/led-machine $ sudo systemctl start led-machine
+sudo systemctl daemon-reload
+sudo systemctl enable led-machine
+sudo systemctl start led-machine
 ```
 
 
@@ -67,4 +66,6 @@ offset window blue green red 30% | red // start on "window" offset, first 30% is
 offset window blue green red 30p | red // start on "window" offset, first 30 pixels is blue green red, other pixels is only red
 lamp josh // turns on a certain set of pixels to white
 blue green red | red ~ purple ~ blue purple // Split on "~". For each setting, fade between them
+( ( blue green red ) | red ) ~ ( purple ) ~ ( blue purple ) // Same as above
+blue green red | ( red ~ purple ) ~ blue purple
 ```
