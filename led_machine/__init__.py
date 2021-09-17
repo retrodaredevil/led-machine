@@ -24,8 +24,8 @@ NUMBER_OF_PIXELS = 450
 START_PIXELS_TO_HIDE = 21
 VIRTUAL_PIXELS = NUMBER_OF_PIXELS - START_PIXELS_TO_HIDE
 PIXEL_OFFSETS = {
-    "side_half": 15,
-    "front_back": 130
+    "side_half": 49,
+    "front_back": 49 + (VIRTUAL_PIXELS // 4)
 }
 
 
@@ -196,7 +196,10 @@ def handle_message(text: str, led_state: LedState, is_lamp: bool, context: Messa
             led_state.main_setting_holder.setting = requested_settings[0]
         else:
             offset_string = get_string_after(text, "offset")
-            offset_pixels = PIXEL_OFFSETS.get(offset_string) or PIXEL_OFFSETS["side_half"]
+            try:
+                offset_pixels = int(offset_string)
+            except ValueError:
+                offset_pixels = PIXEL_OFFSETS.get(offset_string) or PIXEL_OFFSETS["side_half"]
             pixels_per_partition = VIRTUAL_PIXELS // len(requested_settings)
             extra_pixels = VIRTUAL_PIXELS % len(requested_settings)
             start_pixel = START_PIXELS_TO_HIDE + offset_pixels
