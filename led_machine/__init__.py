@@ -197,6 +197,8 @@ def handle_message(text: str, led_state: LedState, is_lamp: bool, context: Messa
         else:
             offset_string = get_string_after(text, "offset")
             try:
+                if offset_string is None:
+                    raise ValueError()
                 offset_pixels = int(offset_string)
             except ValueError:
                 offset_pixels = PIXEL_OFFSETS.get(offset_string) or PIXEL_OFFSETS["side_half"]
