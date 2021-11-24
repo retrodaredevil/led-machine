@@ -89,11 +89,6 @@ class LedState:
         # Values that are directly mutated
         self.color_time_multiplier = 1.0
         self.pattern_time_multiplier = 1.0
-        simple_rainbow = self.parse_color_setting("rainbow")
-        if simple_rainbow is None:
-            raise AssertionError("Should not get None for string 'rainbow'!")
-        self.main_alter: Alter = simple_rainbow
-        self.pattern_alter: Alter = AlterNothing()  # TODO think about making this a list of alters
 
         # Values that remain unchanged, but are based on the state defined above
         self.color_time_multiplier_getter = lambda: self.color_time_multiplier
@@ -105,6 +100,12 @@ class LedState:
         # self.solid_color_percent_getter = SumPercentGetter([ReversingPercentGetter(10.0, 15.0 * 60, 10.0), color_percent_getter_push])
         self.solid_color_percent_getter = ReversingPercentGetter(10.0, 15.0 * 60, 10.0)
         """The percent getter that should be used for solid color settings"""
+
+        simple_rainbow = self.parse_color_setting("rainbow")
+        if simple_rainbow is None:
+            raise AssertionError("Should not get None for string 'rainbow'!")
+        self.main_alter: Alter = simple_rainbow
+        self.pattern_alter: Alter = AlterNothing()  # TODO think about making this a list of alters
 
     def reset(self):
         self.color_time_multiplier = 1.0
