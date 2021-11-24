@@ -1,23 +1,21 @@
 import math
-from typing import List, Optional
+from typing import Optional
 
+from led_machine.alter import Alter, Position, LedMetadata
 from led_machine.color import Color
 from led_machine.percent import PercentGetter
-from led_machine.settings import LedSetting
 
 
-class RainbowSetting(LedSetting):
-    def __init__(self, percent_getter: PercentGetter, led_spread: int):
+class AlterRainbow(Alter):
+    def __init__(self, percent_getter: PercentGetter, led_spread: float):
         self.percent_getter: PercentGetter = percent_getter
         self.led_spread = led_spread
 
-    def apply(self, seconds: float, pixels_list: List[List[Optional[Color]]]):
+    def alter_pixel(self, seconds: float, pixel_position: Position, current_color: Optional[Color], metadata: LedMetadata) -> Optional[Color]:
         percent = self.percent_getter.get_percent(seconds)
 
         led_spread = self.led_spread
-        for pixels in pixels_list:
-            for i in range(len(pixels)):
-                pixels[i] = get_rainbow((percent + i / led_spread) % 1)
+        return get_rainbow((percent + pixel_position / led_spread) % 1)
 
 
 def get_rainbow(percent: float) -> Color:

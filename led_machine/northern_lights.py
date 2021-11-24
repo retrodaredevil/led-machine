@@ -2,9 +2,8 @@ import math
 import random
 from typing import List, Optional
 
+from led_machine.alter import Alter, Position, LedMetadata
 from led_machine.color import Color
-from led_machine.settings import LedSetting
-
 
 OFFSET_TRANSLATE_SPEED = 3.0
 """Offset translate speed in pixels per second"""
@@ -24,7 +23,7 @@ class Chunk:
         return self.fade_spot + math.sin(seconds * self.fade_oscillate_speed) * self.fade_oscillate_magnitude
 
 
-class NorthernLightsSetting(LedSetting):
+class AlterNorthernLights(Alter):
     def __init__(self, colors: List[Color], pixel_span: int):
         self.chunks = [Chunk(color) for color in colors]
         self.pixel_span = pixel_span
@@ -48,8 +47,8 @@ class NorthernLightsSetting(LedSetting):
             result -= self.pixel_span
         self.desired_offset = self.offset + result
 
-    def apply(self, seconds: float, pixels_list: List[List[Optional[Color]]]):
-        delta = seconds - self.last_seconds
+    def alter_pixel(self, seconds: float, pixel_position: Position, current_color: Optional[Color], metadata: LedMetadata) -> Optional[Color]:
+        delta = seconds - self.last_seconds  # delta may be 0 sometimes, and that is OK
         self.last_seconds = seconds
         if delta > 1.0:
             self.reset()
@@ -70,24 +69,22 @@ class NorthernLightsSetting(LedSetting):
                 chunk.fade_oscillate_magnitude = random.uniform(0.05, 0.2)
 
         full_chunk_width = self.pixel_span / len(self.chunks)
-        for pixels in pixels_list:
-            for pixel_index in range(len(pixels)):
-                pixel_spot = (pixel_index + self.offset) % self.pixel_span
-                for chunk_index, chunk in enumerate(self.chunks):
-                    if pixel_spot <= chunk_index * full_chunk_width + chunk.width:
-                        pixels[pixel_index] = chunk.color
-                        break
-                    if pixel_spot < (chunk_index + 1) * full_chunk_width:
-                        left_color = chunk.color
-                        right_color = self.chunks[(chunk_index + 1) % len(self.chunks)].color
-                        middle_color = left_color.lerp(right_color, 0.5)
-                        fade_divisor = full_chunk_width - chunk.width
-                        percent_distance = (pixel_spot - chunk_index * full_chunk_width - chunk.width) / fade_divisor
-                        focal_point = chunk.get_focal_point(seconds)
-                        assert 0 <= focal_point <= 1, f"Focal point is {focal_point}"
-                        if percent_distance <= focal_point:
-                            pixels[pixel_index] = left_color.lerp(middle_color, percent_distance / focal_point)
-                        else:
-                            percent_lerp = (percent_distance - focal_point) / (1 - focal_point)
-                            pixels[pixel_index] = middle_color.lerp(right_color, percent_lerp)
-                        break
+        pixel_spot = (pixel_position + self.offset) % self.pixel_span
+        for chunk_index, chunk in enumerate(self.chunks):
+            if pixel_spot <= chunk_index * full_chunk_width + chunk.width:
+                return chunk.color
+            if pixel_spot < (chunk_index + 1) * full_chunk_width:
+                left_color = chunk.color
+                right_color = self.chunks[(chunk_index + 1) % len(self.chunks)].color
+                middle_color = left_color.lerp(right_color, 0.5)
+                fade_divisor = full_chunk_width - chunk.width
+                percent_distance = (pixel_spot - chunk_index * full_chunk_width - chunk.width) / fade_divisor
+                focal_point = chunk.get_focal_point(seconds)
+                assert 0 <= focal_point <= 1, f"Focal point is {focal_point}"
+                if percent_distance <= focal_point:
+                    return left_color.lerp(middle_color, percent_distance / focal_point)
+                else:
+                    percent_lerp = (percent_distance - focal_point) / (1 - focal_point)
+                    return middle_color.lerp(right_color, percent_lerp)
+
+        raise AssertionError(f"Could not find chunk for position: {pixel_position}")

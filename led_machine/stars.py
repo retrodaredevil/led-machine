@@ -1,8 +1,8 @@
 from random import randint, uniform
-from typing import Optional, Tuple, List, Callable
+from typing import Optional, List, Callable
 
+from led_machine.alter import Alter, Position, LedMetadata
 from led_machine.color import Color
-from led_machine.settings import LedSetting, AlterPixelSetting
 
 MAX_DELTA = 0.3
 STAR_PER_PIXEL = 1 / 12
@@ -20,10 +20,9 @@ class Star:
         self.brightness_right: float = 0.9
 
 
-class StarSetting(AlterPixelSetting):
+class AlterStar(Alter):
 
-    def __init__(self, setting: LedSetting, expected_pixels: int, padding: int, time_multiplier_getter: Callable[[], float], reverse: bool = False):
-        super().__init__(setting)
+    def __init__(self, expected_pixels: int, padding: int, time_multiplier_getter: Callable[[], float], reverse: bool = False):
         self.reverse = reverse
         self.time_multiplier_getter = time_multiplier_getter
 
@@ -55,36 +54,35 @@ class StarSetting(AlterPixelSetting):
         shooting_star.brightness_right = 0.1
         shooting_star.velocity = -10.0
 
-    def apply(self, seconds: float, pixels_list: list):
+    def alter_pixel(self, seconds: float, pixel_position: Position, current_color: Optional[Color], metadata: LedMetadata) -> Optional[Color]:
         delta = 0.0
         if self.last_seconds is not None:
             delta = seconds - self.last_seconds
         self.last_seconds = seconds
 
-        for star in self.stars:
-            star.position += star.velocity * delta * self.time_multiplier_getter()  # instead of altering seconds, just increase the speed by this multiplier
-            if star.position > self.spawn_upper:
-                star.position = self.spawn_lower + (star.position - self.spawn_upper)
-            elif star.position < self.spawn_lower:
-                star.position = self.spawn_upper - (self.spawn_lower - star.position)
-        super().apply(seconds, pixels_list)
+        if delta > 0:
+            for star in self.stars:
+                star.position += star.velocity * delta * self.time_multiplier_getter()  # instead of altering seconds, just increase the speed by this multiplier
+                if star.position > self.spawn_upper:
+                    star.position = self.spawn_lower + (star.position - self.spawn_upper)
+                elif star.position < self.spawn_lower:
+                    star.position = self.spawn_upper - (self.spawn_lower - star.position)
 
-    def alter(self, seconds: float, list_index: int, pixel_index: int, pixels, pixel_color: Optional[Color]) -> Optional[Color]:
-        if not pixel_color:
+        if not current_color:
             return None
 
         brightness = 0.0
         for star in self.stars:
             lower = star.position - star.thickness / 2
             upper = star.position + star.thickness / 2
-            if lower <= pixel_index <= upper:
+            if lower <= pixel_position <= upper:
                 brightness = max(brightness, star.brightness)
-            elif lower - star.fade_distance_left <= pixel_index < lower:  # 3.5 to 4
-                brightness = max(brightness, (pixel_index - (lower - star.fade_distance_left)) / star.fade_distance_left * star.brightness_left)
-            elif upper < pixel_index <= upper + star.fade_distance_right:
-                brightness = max(brightness, ((upper + star.fade_distance_right) - pixel_index) / star.fade_distance_right * star.brightness_right)
+            elif lower - star.fade_distance_left <= pixel_position < lower:  # 3.5 to 4
+                brightness = max(brightness, (pixel_position - (lower - star.fade_distance_left)) / star.fade_distance_left * star.brightness_left)
+            elif upper < pixel_position <= upper + star.fade_distance_right:
+                brightness = max(brightness, ((upper + star.fade_distance_right) - pixel_position) / star.fade_distance_right * star.brightness_right)
 
         assert 0.0 <= brightness <= 1.0, f"Brightness is {brightness}"
         if self.reverse:
             brightness = 1 - brightness
-        return pixel_color.scale(brightness)
+        return current_color.scale(brightness)
