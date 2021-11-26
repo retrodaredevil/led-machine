@@ -1,4 +1,4 @@
-from typing import Optional, List, Tuple, Sequence
+from typing import Optional, Tuple, Sequence
 
 from led_machine.alter import Alter, Position, LedMetadata
 from led_machine.color import Color
@@ -21,5 +21,8 @@ class AlterPartition(Alter):
                 break
 
         if override_setting is not None:
+            # print(f"got: {override_setting} for position: {pixel_position}")
+            # if pixel_position == 449:
+            #     raise AssertionError()
             return override_setting.alter_pixel(seconds, pixel_position, current_color, metadata)
         return current_color

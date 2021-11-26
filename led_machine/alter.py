@@ -1,8 +1,7 @@
 from abc import abstractmethod, ABC
-from typing import Tuple, Optional, List, Union, Callable
+from typing import Optional, List, Union, Callable
 
 from led_machine.color import Color, ColorAlias
-
 
 Position = Union[int, float]
 
@@ -74,3 +73,9 @@ class AlterMultiplexer(Alter):
         for alter in self.alters:
             current_color = alter.alter_pixel(seconds, pixel_position, current_color, metadata)
         return current_color
+
+    def __str__(self):
+        return f"AlterMultiplexer(alters={self.alters})"
+
+    def __repr__(self):
+        return str(self)
