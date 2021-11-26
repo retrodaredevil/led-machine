@@ -38,6 +38,12 @@ reactions:write
 Copy `led-machine.service` to `/etc/systemd/system/`
 
 
+```shell
+sudo systemctl daemon-reload
+sudo systemctl enable led-machine
+sudo systemctl start led-machine
+```
+
 
 ### Technical
 
@@ -48,23 +54,20 @@ Run:
 mypy led_machine
 ```
 
-```shell
-sudo systemctl daemon-reload
-sudo systemctl enable led-machine
-sudo systemctl start led-machine
+
+### Implemented Ideas:
 ```
-
-
-
-### Ideas:
-```
-fast rainbow; slow carnival // effectively two messages being sent in one
 blue green red  // fades between colors
 blue green red | red // half blue green red, half only red
 offset window blue green red | red // blue green red starts using the "window" offset, then other half is only red
+lamp josh // turns on a certain set of pixels to white
+```
+
+### Ideas
+```
+fast rainbow; slow carnival // effectively two messages being sent in one
 offset window blue green red 30% | red // start on "window" offset, first 30% is blue green red, other 70% is only red
 offset window blue green red 30p | red // start on "window" offset, first 30 pixels is blue green red, other pixels is only red
-lamp josh // turns on a certain set of pixels to white
 blue green red | red ~ purple ~ blue purple // Split on "~". For each setting, fade between them
 ( ( blue green red ) | red ) ~ ( purple ) ~ ( blue purple ) // Same as above
 blue green red | ( red ~ purple ) ~ blue purple
