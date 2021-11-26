@@ -15,6 +15,8 @@ from led_machine.slack import SlackHelper
 NUMBER_OF_PIXELS = 450
 # VIRTUAL_PIXELS = NUMBER_OF_PIXELS - START_PIXELS_TO_HIDE
 
+# TODO most of these imports are used in main. They pollute the namespace and confuse people. Do something about it eventually
+
 
 def main():
     import board

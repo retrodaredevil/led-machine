@@ -217,7 +217,7 @@ def handle_message(text: str, led_state: LedState, is_lamp: bool, context: Messa
 
     time_multiplier = get_time_multiplier(text)
     if time_multiplier is not None:
-        if not color_present and pattern_present:
+        if not color_present and pattern_present or "pattern" in text:
             # Pattern speed
             led_state.pattern_time_multiplier = time_multiplier
         else:

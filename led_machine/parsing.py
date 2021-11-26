@@ -3,6 +3,8 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Final, List, Optional, Callable, Dict, Union, Sequence, Tuple
 
+from led_machine.percent import ReversingPercentGetter
+from led_machine.blend import AlterBlend
 from led_machine.partition import AlterPartition
 from led_machine.alter import Alter, AlterNothing, AlterMultiplexer, Position
 from led_machine.parse import StaticToken, Token, StringToken, OrganizerToken, NothingToken
@@ -123,7 +125,9 @@ class BlendAlterCreator(AlterCreator):
         self.creators = creators
 
     def create(self, start_pixel: int, pixel_count: int, wrap_at: int, wrap_to: int) -> Alter:
-        raise AssertionError("NEED TODO")
+        alters = [creator.create(start_pixel, pixel_count, wrap_at, wrap_to) for creator in self.creators]
+        default_percent_getter = ReversingPercentGetter(2.0, 10.0 * 60, 2.0)  # TODO don't hard code speed
+        return AlterBlend(default_percent_getter, alters)
 
 
 @dataclass
@@ -199,12 +203,10 @@ def tokens_to_creator(
                     if offset_string is not None:
                         new_offset = creator_settings.get_offset(offset_string)
                         if new_offset is not None:
-                            print(creator_settings)
                             creator_settings = dataclasses.replace(
                                 creator_settings,
                                 current_partition_offset=new_offset
                             )
-                            print(creator_settings)
 
             creators_to_combine = []
             for token in tokens:
@@ -216,7 +218,10 @@ def tokens_to_creator(
                     if pattern_alter is not None:
                         creators_to_combine.append(StaticCreator(CreatorData(False, True), pattern_alter))
                 elif isinstance(token, OrganizerToken):
-                    creator = tokens_to_creator(token.tokens, text_to_color_alter, text_to_pattern_alter, creator_settings)
+                    creator = tokens_to_creator(
+                        token.tokens, text_to_color_alter, text_to_pattern_alter,
+                        dataclasses.replace(creator_settings, current_partition_offset=0)
+                    )
                     creators_to_combine.append(creator)
                 elif isinstance(token, StaticToken):
                     print(f"Unknown static token: {token}")  # TODO make some sort of error reporting mechanism
