@@ -32,20 +32,14 @@ class AlterNothing(Alter):
         return current_color
 
 
-class AlterHolder(Alter):
-    def __init__(self, alter: Alter):
-        self.alter = alter
-
-    def alter_pixel(self, seconds: float, pixel_position: Position, current_color: Optional[Color], metadata: LedMetadata) -> Optional[Color]:
-        pass
-
-
 class AlterDim(Alter):
     def __init__(self, dim: float):
         self.dim = dim
 
     def alter_pixel(self, seconds: float, pixel_position: Position, current_color: Optional[Color], metadata: LedMetadata) -> Optional[Color]:
-        pass
+        if current_color is None:
+            return None
+        return current_color.scale(self.dim)
 
 
 class AlterSolid(Alter):
