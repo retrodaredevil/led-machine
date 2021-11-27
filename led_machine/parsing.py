@@ -1,7 +1,7 @@
 import dataclasses
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Final, List, Optional, Callable, Dict, Union, Sequence, Tuple
+from typing import List, Optional, Callable, Dict, Union, Tuple
 
 from led_machine.percent import ReversingPercentGetter
 from led_machine.blend import AlterBlend
@@ -21,7 +21,7 @@ class Length(ABC):
 class PixelLength(Length):
     def __init__(self, pixel_length: int):
         super().__init__()
-        self.pixel_length: Final[int] = pixel_length
+        self.pixel_length: int = pixel_length
         if pixel_length < 0:
             raise ValueError(f"Pixel length cannot be negative! pixel_length: {pixel_length}")
 
@@ -29,7 +29,7 @@ class PixelLength(Length):
 class PercentLength(Length):
     def __init__(self, percent: float):
         super().__init__()
-        self.percent: Final[float] = percent
+        self.percent: float = percent
         if percent < 0:
             raise ValueError(f"Percent cannot be less than 0! percent: {percent}")
         if percent > 1:
@@ -46,7 +46,7 @@ class CreatorData:
 
 class AlterCreator(ABC):
     def __init__(self, creator_data: CreatorData):
-        self.creator_data: Final[CreatorData] = creator_data
+        self.creator_data: CreatorData = creator_data
 
     @abstractmethod
     def create(self, start_pixel: int, pixel_count: int, wrap_at: int, wrap_to: int) -> Alter:

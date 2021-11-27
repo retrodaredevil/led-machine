@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Final, List
+from typing import List
 
 
 class Token(ABC):
@@ -10,8 +10,8 @@ class Token(ABC):
 class StaticToken(Token):
     def __init__(self, name: str, pattern: str):
         super().__init__()
-        self.name: Final[str] = name
-        self.pattern: Final[str] = pattern
+        self.name: str = name
+        self.pattern: str = pattern
 
     def __str__(self):
         return f"StaticToken(name={self.name})"
