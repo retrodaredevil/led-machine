@@ -88,65 +88,8 @@ orange orange orange orange orange orange orange orange orange orange orange ora
 deep purple orange deep purple orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange red red red
 red red red orange orange orange orange orange orange orange orange orange yellow yellow yellow yellow white yellow"""
 
-STORM2 = """#000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 deep purple purple #000 purple #000 purple #000  #000 #000 #000 #000 #000
-#000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 deep purple purple #000 purple #000 purple #000 #000 deep purple purple #000 purple #000 purple
-#000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 deep purple
-deep purple purple #000 purple deep purple purple #000 purple #000 purple #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000
-#000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000
-#000 #000 #000 #000 #000 purple purple #000 purple #000 purple #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 purple purple #000
-purple #000 purple #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 purple  #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000
-#000 #000 #000 #000 purple  #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 purple purple #000 purple
-#000 purple #000 #000 #000 purple purple #000 purple #000 purple #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 purple purple #000
-purple #000 purple #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 purple purple #000 purple #000 purple #000 #000 purple purple #000 purple #000 purple
-#000 #000 #000 #000 #000 purple purple #000 purple #000 purple #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000
-#000 #000 #000 purple #000 purple #100 #200 #300 #400 #500 #600 #700 #800 #900 #900 purple #900 #900 #900 #900 #900 #900 purple #900 #900 #900 #900 purple
-purple #900 purple #900 #900 #900 #900 #900 #900 #900 #900 #900 #900 purple #900 #900 #900 #900 #900 #900 purple #900 #900 #900 #900 #900 #900 #900 #900 #900
-#900 purple #900 #900 #900 #900 #900 #900 #900 Purple #900 purple #900 purple purple purple #000 purple #000 purple #000 #000 #000 #000 #000 #000 #000 #000
-#000 deep purple deep purple deep purple  #000 deep purple purple #000 purple #000 purple #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #900 purple white
-purple #900 purple #900 #900 #900 #900 purple purple #900 #900 #900 #900 purple #900 purple purple #000 purple purple #900 #900 #900 #900 purple #900 #900
-#900 #900 purple #900 purple #900 #900 #000 #900 purple #900 #900 #900 #900 deep purple deep purple deep purple  #900 deep purple deep purple #900 #900
-purple #900 purple #900 purple #900 #900 purple #900 purple purple #000 purple #000 purple #000 #000 #000 #000 #000 #000 #000 #000 deep purple purple #000
-purple #000 purple #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 purple purple #000 purple #000 purple #000 #000
-#000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000
-#000 deep purple deep purple #000  deep purple purple #000 purple #000 purple #000 #000 #000 #000 #000 deep purple purple #000 purple #000 purple purple
-purple #000 purple #000 purple #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000
-#000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 purple purple #000 purple #000 purple #000
-#000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 purple purple #000 purple #000 purple #000 #000 #000
-#000 #000 #000 #000 #000 #000 #000 #000 deep purple deep purple purple #000 purple #000 purple #000 deep purple purple #000 purple #000 purple #000 #000 #000
-#000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000  #000 #000 #000 #000 deep purple
-deep purple deep purple purple #000 purple #000 purple #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 purple purple #000
-purple #000 purple #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000
-#000 deep purple #000 deep purple purple #000 purple #000 purple #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000
-#000 #000 #000 #000 #000 #000 #000 #000 yellow yellow yellow yellow white yellow stillSolid #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000
-#000 deep purple purple #000 purple #000 purple #000  #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 deep purple purple
-#000 purple #000 purple #000 #000 deep purple purple #000 purple #000 purple #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000
-#000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 deep purple deep purple purple #000 purple deep purple purple #000 purple #000 purple #000
-#000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000
-#000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 purple purple #000 purple #000 purple #000 #000 #000 #000
-#000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 purple purple #000 purple #000 purple #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000
-purple  #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 purple  #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000
-#000 #000 #000 #000 #000 #000 #000 #000 #000 purple purple #000 purple #000 purple #000 #000 #000 purple purple #000 purple #000 purple #000 #000 #000 #000
-#000 #000 #000 #000 #000 #000 #000 #000 #000 #000 purple purple #000 purple #000 purple #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 purple purple #000
-purple #000 purple #000 #000 purple purple #000 purple #000 purple #000 #000 #000 #000 #000 purple purple #000 purple #000 purple #000 #000 #000 #000 #000
-#000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 purple #000 purple #100 #200 #300 #400 #500 #600 #700 #800 #900 #900
-purple #900 #900 #900 #900 #900 #900 purple #900 #900 #900 #900 purple purple #900 purple #900 #900 #900 #900 #900 #900 #900 #900 #900 #900 purple #900 #900
-#900 #900 #900 #900 purple #900 #900 #900 #900 #900 #900 #900 #900 #900 #900 purple #900 #900 #900 #900 #900 #900 #900 Purple #900 purple #900 purple purple
-purple #000 purple #000 purple #000 #000 #000 #000 #000 #000 #000 #000 #000 deep purple deep purple deep purple  #000 deep purple purple #000 purple #000
-purple #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #900 purple white purple #900 purple #900 #900 #900 #900 purple purple #900 #900 #900 #900 purple
-#900 purple purple #000 purple purple #900 #900 #900 #900 purple #900 #900 #900 #900 purple #900 purple #900 #900 #000 #900 purple #900 #900 #900 #900 deep
-purple deep purple deep purple  #900 deep purple deep purple #900 #900 purple #900 purple #900 purple #900 #900 purple #900 purple purple #000 purple #000
-purple #000 #000 #000 #000 #000 #000 #000 #000 deep purple purple #000 purple #000 purple #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000
-#000 #000 #000 #000 #000 purple purple #000 purple #000 purple #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000
-#000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 deep purple deep purple #000  deep purple purple #000 purple #000 purple #000 #000
-#000 #000 #000 deep purple purple #000 purple #000 purple purple purple #000 purple #000 purple #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000
-#000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000
-#000 #000 #000 #000 #000 purple purple #000 purple #000 purple #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000
-#000 #000 #000 purple purple #000 purple #000 purple #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 deep purple deep purple purple #000 purple #000
-purple #000 deep purple purple #000 purple #000 purple #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000
-#000 #000 #000 #000 #000 #000 #000 #000  #000 #000 #000 #000 deep purple deep purple deep purple purple #000 purple #000 purple #000 #000 #000 #000 #000 #000
-#000 #000 #000 #000 #000 #000 #000 #000 #000 #000 purple purple #000 purple #000 purple #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000
-#000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 deep purple #000 deep purple purple #000 purple #000 purple #000 #000 #000 #000 #000
-#000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 yellow yellow yellow yellow white yellow """
+STORM2 = STORM1.lower().replace("orange", "#000").replace("dupree", "#000").replace("red", "#000")\
+    .replace("purple #000 #000 #000", "purple purple #000 #909").replace("purple #000 #000", "purple #000 #909")
 
 
 def get_time_multiplier(text) -> Optional[float]:
