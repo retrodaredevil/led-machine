@@ -88,8 +88,10 @@ orange orange orange orange orange orange orange orange orange orange orange ora
 deep purple orange deep purple orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange red red red
 red red red orange orange orange orange orange orange orange orange orange yellow yellow yellow yellow white yellow"""
 
-STORM2 = STORM1.lower().replace("orange", "#000").replace("dupree", "#000").replace("red", "#000")\
-    .replace("purple #000 #000 #000", "purple purple #000 #909").replace("purple #000 #000", "purple #000 #909")
+STORM2 = STORM1.lower().replace("purple orange orange orange", "purple purple dupree #909")\
+    .replace("purple dupree dupree dupree", "purple purple red #909")\
+    .replace("purple red red red ", "purple #909 purple purple")\
+    .replace("purple #909 #909 ", "purple #000 purple")
 
 
 def get_time_multiplier(text) -> Optional[float]:
