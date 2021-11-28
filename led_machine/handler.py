@@ -92,7 +92,7 @@ red red red orange orange orange orange orange orange orange orange orange yello
 #     .replace("purple dupree dupree dupree", "purple purple red #909")\
 #     .replace("purple red red red ", "purple #909 purple purple")\
 #     .replace("purple #909 #909 ", "purple #000 purple")
-STORM2 = STORM1.lower().replace("purple orange ", "purple purple") \
+STORM2 = STORM1.lower().replace("purple orange", "purple purple") \
     .replace("purple dupree", "purple purple") \
     .replace("purple red", "purple purple")
 
