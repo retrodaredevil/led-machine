@@ -21,6 +21,131 @@ START_PIXELS_TO_HIDE = 21
 # DIM = 0.8 * 0.01  # good for really dim
 # DIM = 0.8 * 0.12  # good for movie
 
+STORM1 = """Solid orange orange orange orange orange orange orange orange orange orange orange orange orange orange deep purple orange orange orange orange
+orange orange  orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange deep purple orange
+orange orange orange orange orange orange deep purple orange orange orange orange orange orange orange orange orange orange orange orange orange orange
+orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange deep purple deep
+purple orange orange orange deep purple orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange
+orange orange orange Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree
+Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree purple Dupree Dupree
+Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree purple Dupree Dupree Dupree
+Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree purple  Dupree Dupree Dupree Dupree Dupree Dupree
+Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree purple  Dupree Dupree Dupree Dupree Dupree Dupree Dupree Red red red red red red
+red red red red Red red red purple red red red red red red red Red purple red red red red red red red red red Red red red red red red red red red red purple
+Red red red red red red red red red red Red red red red red purple red red red red red Red red purple red red red red red red red red Red red purple red red
+red red red red red red Red red red red red red red red red red Red red red red red red red red red purple #000 #000 #100 #200 #300 #400 #500 #600 #700 #800
+#900 #900 purple #900 #900 #900 #900 #900 #900 purple #900 #900 #900 #900 purple purple #900 purple #900 #900 #900 #900 #900 #900 #900 #900 #900 #900 purple
+#900 #900 #900 #900 #900 #900 purple #900 #900 #900 #900 #900 #900 #900 #900 #900 #900 purple #900 #900 #900 #900 #900 #900 #900 Purple #900 purple #900
+purple purple Dupree Dupree Dupree Dupree Dupree orange orange orange orange orange orange orange orange orange deep purple deep purple deep purple  orange
+deep purple orange orange orange orange orange orange orange orange orange orange Dupree Dupree Dupree Dupree Dupree #900 purple white purple #900 purple
+#900 #900 #900 #900 purple purple #900 #900 #900 #900 purple #900 purple #000 #000 #000 purple #900 #900 #900 #900 purple #900 #900 #900 #900 purple #900
+purple #900 #900 #000 #900 purple #900 #900 #900 #900 deep purple deep purple deep purple  #900 deep purple deep purple #900 #900 purple #900 purple #900
+purple #900 #900 purple #900 purple Red red red red red red orange red red red red Red red deep purple red red red red red red red red Red red red red red
+red red red red red Red red red red red purple red red red red red Red red red red red red red red red red Red orange orange red red red red red red red red
+red Red red red red red red red red red red Red red deep purple deep purple red  deep purple red red red red red red red Red red red deep purple red red red
+red red purple red red Red red red red red red red red red red Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree
+Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree orange orange orange Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree
+Dupree Dupree Dupree Dupree Dupree Dupree purple Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree
+Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree purple Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree
+Dupree Dupree Dupree Dupree Dupree Dupree Dupree deep purple deep purple Dupree Dupree Dupree Dupree Dupree Dupree deep purple Dupree Dupree Dupree Dupree
+Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree orange orange orange orange orange orange orange orange orange orange orange orange orange
+orange orange orange orange orange orange orange  orange orange orange orange deep purple deep purple deep purple orange orange orange orange orange orange
+orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange purple orange orange orange red red red red orange
+orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange
+orange orange orange deep purple orange deep purple orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange
+orange red red red red red red orange orange orange orange orange orange orange orange orange yellow yellow yellow yellow white yellow stillSolid orange
+orange orange orange orange orange orange orange orange orange orange orange orange orange deep purple orange orange orange orange orange orange  orange
+orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange deep purple orange orange orange orange
+orange orange orange deep purple orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange
+orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange deep purple deep purple orange orange
+orange deep purple orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange
+Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree
+Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree purple Dupree Dupree Dupree Dupree Dupree
+Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree purple Dupree Dupree Dupree Dupree Dupree Dupree
+Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree purple  Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree
+Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree purple  Dupree Dupree Dupree Dupree Dupree Dupree Dupree Red red red red red red red red red red Red
+red red purple red red red red red red red Red purple red red red red red red red red red Red red red red red red red red red red purple Red red red red red
+red red red red red Red red red red red purple red red red red red Red red purple red red red red red red red red Red red purple red red red red red red red
+red Red red red red red red red red red red Red red red red red red red red red purple #000 #000 #100 #200 #300 #400 #500 #600 #700 #800 #900 #900 purple
+#900 #900 #900 #900 #900 #900 purple #900 #900 #900 #900 purple purple #900 purple #900 #900 #900 #900 #900 #900 #900 #900 #900 #900 purple #900 #900 #900
+#900 #900 #900 purple #900 #900 #900 #900 #900 #900 #900 #900 #900 #900 purple #900 #900 #900 #900 #900 #900 #900 Purple #900 purple #900 purple purple
+Dupree Dupree Dupree Dupree Dupree orange orange orange orange orange orange orange orange orange deep purple deep purple deep purple  orange deep purple
+orange orange orange orange orange orange orange orange orange orange Dupree Dupree Dupree Dupree Dupree #900 purple white purple #900 purple #900 #900 #900
+#900 purple purple #900 #900 #900 #900 purple #900 purple #000 #000 #000 purple #900 #900 #900 #900 purple #900 #900 #900 #900 purple #900 purple #900 #900
+#000 #900 purple #900 #900 #900 #900 deep purple deep purple deep purple  #900 deep purple deep purple #900 #900 purple #900 purple #900 purple #900 #900
+purple #900 purple Red red red red red red orange red red red red Red red deep purple red red red red red red red red Red red red red red red red red red red
+Red red red red red purple red red red red red Red red red red red red red red red red Red orange orange red red red red red red red red red Red red red red
+red red red red red red Red red deep purple deep purple red  deep purple red red red red red red red Red red red deep purple red red red red red purple red
+red Red red red red red red red red red red Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree
+Dupree Dupree Dupree Dupree Dupree orange orange orange Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree
+Dupree Dupree Dupree purple Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree
+Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree purple Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree Dupree
+Dupree Dupree Dupree Dupree deep purple deep purple Dupree Dupree Dupree Dupree Dupree Dupree deep purple Dupree Dupree Dupree Dupree Dupree Dupree Dupree
+Dupree Dupree Dupree Dupree Dupree Dupree orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange
+orange orange orange orange  orange orange orange orange deep purple deep purple deep purple orange orange orange orange orange orange orange orange orange
+orange orange orange orange orange orange orange orange orange orange orange orange purple orange orange orange red red red red orange orange orange orange
+orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange
+deep purple orange deep purple orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange orange red red red
+red red red orange orange orange orange orange orange orange orange orange yellow yellow yellow yellow white yellow"""
+
+STORM2 = """Solid #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 deep purple purple #000 #909  #000 #000  #000 #000 #000 #000 #000
+#000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 deep purple purple #000 #909  #000 #000 #000 deep purple purple #000 #909  #000 #000 #000 #000
+#000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 deep purple deep purple
+#909 purple #000 deep purple purple #000 #909  #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000
+#000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000
+purple purple #000 #909  #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 purple purple #000 #909  #000 #000 #000 #000 #000
+#000 #000 #000 #000 #000 #000 #000 #000 #000 purple  #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 purple  #000 #000
+#000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 purple purple #000 #909  #000 #000 #000 #000 purple purple #000
+#909  #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 purple purple #000 #909  #000 #000 #000 #000 #000 #000 #000 #000 #000 #000
+#000 purple purple #000 #909  #000 #000 #000 purple purple #000 #909  #000 #000 #000 #000 #000 #000 purple purple #000 #909  #000 #000 #000 #000 #000 #000
+#000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 purple #909 purple #100 #200 #300 #400 #500 #600 #700 #800 #900 #900
+purple #900 #900 #900 #900 #900 #900 purple #900 #900 #900 #900 purple purple #900 purple #900 #900 #900 #900 #900 #900 #900 #900 #900 #900 purple #900 #900
+#900 #900 #900 #900 purple #900 #900 #900 #900 #900 #900 #900 #900 #900 #900 purple #900 #900 #900 #900 #900 #900 #900 Purple #900 purple #900 purple purple
+purple #000 #909  #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 deep purple deep purple deep purple  #000 deep purple purple #000 #909  #000 #000 #000
+#000 #000 #000 #000 #000 #000 #000 #000 #900 purple white purple #900 purple #900 #900 #900 #900 purple purple #900 #900 #900 #900 purple #900 purple #909
+purple #000 purple #900 #900 #900 #900 purple #900 #900 #900 #900 purple #900 purple #900 #900 #000 #900 purple #900 #900 #900 #900 deep purple deep purple
+deep purple  #900 deep purple deep purple #900 #900 purple #900 purple #900 purple #900 #900 purple #900 purple purple #000 #909  #000 #000 #000 #000 #000
+#000 #000 #000 #000 deep purple purple #000 #909  #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 purple
+purple #000 #909  #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000
+#000 #000 #000 #000 #000 #000 #000 deep purple deep purple #000  deep purple purple #000 #909  #000 #000 #000 #000 #000 #000 deep purple purple #000 #909
+#000 purple purple #000 #909  #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000
+#000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 purple purple #000 #909  #000 #000
+#000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 purple purple #000 #909  #000 #000 #000 #000 #000
+#000 #000 #000 #000 #000 #000 #000 deep purple deep purple purple #000 #909  #000 #000 deep purple purple #000 #909  #000 #000 #000 #000 #000 #000 #000 #000
+#000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000  #000 #000 #000 #000 deep purple deep purple deep
+purple purple #000 #909  #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 purple purple #000 #909  #000 #000 #000 #000
+#000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 deep purple #000 deep purple
+purple #000 #909  #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000
+yellow yellow yellow yellow white yellow stillSolid #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 deep purple purple #000 #909  #000
+#000  #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 deep purple purple #000 #909  #000 #000 #000 deep purple purple
+#000 #909  #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000
+#000 deep purple deep purple #909 purple #000 deep purple purple #000 #909  #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000
+#000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000
+#000 #000 #000 #000 #000 #000 purple purple #000 #909  #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 purple purple #000
+#909  #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 purple  #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000
+#000 #000 #000 purple  #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 purple purple #000 #909  #000 #000
+#000 #000 purple purple #000 #909  #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 purple purple #000 #909  #000 #000 #000 #000
+#000 #000 #000 #000 #000 #000 #000 purple purple #000 #909  #000 #000 #000 purple purple #000 #909  #000 #000 #000 #000 #000 #000 purple purple #000 #909
+#000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 purple #909 purple #100 #200 #300 #400
+#500 #600 #700 #800 #900 #900 purple #900 #900 #900 #900 #900 #900 purple #900 #900 #900 #900 purple purple #900 purple #900 #900 #900 #900 #900 #900 #900
+#900 #900 #900 purple #900 #900 #900 #900 #900 #900 purple #900 #900 #900 #900 #900 #900 #900 #900 #900 #900 purple #900 #900 #900 #900 #900 #900 #900 Purple
+#900 purple #900 purple purple purple #000 #909  #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 deep purple deep purple deep purple  #000 deep purple
+purple #000 #909  #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #900 purple white purple #900 purple #900 #900 #900 #900 purple purple #900 #900
+#900 #900 purple #900 purple #909 purple #000 purple #900 #900 #900 #900 purple #900 #900 #900 #900 purple #900 purple #900 #900 #000 #900 purple #900 #900
+#900 #900 deep purple deep purple deep purple  #900 deep purple deep purple #900 #900 purple #900 purple #900 purple #900 #900 purple #900 purple purple #000
+#909  #000 #000 #000 #000 #000 #000 #000 #000 #000 deep purple purple #000 #909  #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000
+#000 #000 #000 #000 purple purple #000 #909  #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000
+#000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 deep purple deep purple #000  deep purple purple #000 #909  #000 #000 #000 #000 #000 #000
+deep purple purple #000 #909  #000 purple purple #000 #909  #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000
+#000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 purple
+purple #000 #909  #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 purple purple #000 #909
+#000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 deep purple deep purple purple #000 #909  #000 #000 deep purple purple #000 #909  #000 #000 #000
+#000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000  #000 #000 #000 #000 deep
+purple deep purple deep purple purple #000 #909  #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 purple purple #000 #909
+ #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 deep purple
+ #000 deep purple purple #000 #909  #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000 #000
+ #000 #000 #000 yellow yellow yellow yellow white yellow """
+
 
 def get_time_multiplier(text) -> Optional[float]:
 
@@ -186,6 +311,7 @@ class MessageContext:
 
 
 def handle_message(text: str, led_state: LedState, is_lamp: bool, context: MessageContext):
+    text = text.replace("storm1", STORM1).replace("storm2", STORM2)
     tokens = parse_to_tokens(text, [PARTITION_TOKEN, BLEND_TOKEN], [COMMENT_PARSE_PAIR, SINGLE_LINE_COMMENT_PARSE_PAIR, PARENTHESIS_PARSE_PAIR])
     creator = tokens_to_creator(
         tokens,
