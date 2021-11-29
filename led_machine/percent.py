@@ -2,6 +2,8 @@ import math
 from abc import abstractmethod, ABC
 from typing import List, Callable, Optional
 
+from led_machine.types import TimeMultiplierGetter
+
 
 class PercentGetter(ABC):
     @abstractmethod
@@ -78,7 +80,7 @@ class PercentGetterHolder(PercentGetter):
 
 
 class PercentGetterTimeMultiplier(PercentGetter):
-    def __init__(self, percent_getter: PercentGetter, time_multiplier_getter: Callable[[], float]):
+    def __init__(self, percent_getter: PercentGetter, time_multiplier_getter: TimeMultiplierGetter):
         self.percent_getter: PercentGetter = percent_getter
         self.time_multiplier_getter: Callable = time_multiplier_getter
 

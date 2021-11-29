@@ -3,6 +3,7 @@ from typing import Optional, List, Callable
 
 from led_machine.alter import Alter, Position, LedMetadata
 from led_machine.color import Color
+from led_machine.types import TimeMultiplierGetter
 
 MAX_DELTA = 0.3
 STAR_PER_PIXEL = 1 / 12
@@ -22,7 +23,7 @@ class Star:
 
 class AlterStar(Alter):
 
-    def __init__(self, expected_pixels: int, padding: int, time_multiplier_getter: Callable[[], float], reverse: bool = False):
+    def __init__(self, expected_pixels: int, padding: int, time_multiplier_getter: TimeMultiplierGetter, reverse: bool = False):
         self.reverse = reverse
         self.time_multiplier_getter = time_multiplier_getter
 

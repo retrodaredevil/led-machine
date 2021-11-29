@@ -39,7 +39,6 @@ def main():
     canvas.columnconfigure(0, weight=1)
 
     main_led_state = LedState(NUMBER_OF_PIXELS)
-    main_led_state.main_alter = main_led_state.parse_color_setting("rainbow")
 
     spots = [canvas.create_rectangle(i * PIXEL_SIZE, 0, (i + 1) * PIXEL_SIZE, PIXEL_SIZE * 6, fill="black") for i in range(NUMBER_OF_PIXELS)]
     old_colors: List[Optional[Color]] = [None] * NUMBER_OF_PIXELS

@@ -3,11 +3,12 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import List, Optional, Callable, Dict, Union, Tuple
 
-from led_machine.percent import ReversingPercentGetter
+from led_machine.percent import ReversingPercentGetter, MultiplierPercentGetter, PercentGetterTimeMultiplier
 from led_machine.blend import AlterBlend
 from led_machine.partition import AlterPartition
 from led_machine.alter import Alter, AlterNothing, AlterMultiplexer, Position
 from led_machine.parse import StaticToken, Token, StringToken, OrganizerToken, NothingToken
+from led_machine.types import TimeMultiplierGetter
 
 PARTITION_TOKEN = StaticToken("partition", "|")
 BLEND_TOKEN = StaticToken("blend", "~")
@@ -42,6 +43,7 @@ class CreatorData:
     has_pattern: bool
 
     preferred_length: Union[None, PixelLength, PercentLength] = None
+    directly_nested_time_multiplier: Optional[float] = None
 
 
 class AlterCreator(ABC):
@@ -66,8 +68,8 @@ NOTHING_CREATOR = StaticCreator(CreatorData(False, False), AlterNothing())
 
 
 class CombinerCreator(AlterCreator):
-    def __init__(self, color_creators: List[AlterCreator], pattern_creators: List[AlterCreator]):
-        super().__init__(CreatorData(bool(color_creators), bool(pattern_creators)))
+    def __init__(self, color_creators: List[AlterCreator], pattern_creators: List[AlterCreator], directly_nested_time_multiplier: Optional[float]):
+        super().__init__(CreatorData(bool(color_creators), bool(pattern_creators), directly_nested_time_multiplier=directly_nested_time_multiplier))
         self.color_creators = color_creators
         self.pattern_creators = pattern_creators
 
@@ -118,17 +120,18 @@ class PartitionAlterCreator(AlterCreator):
 
 
 class BlendAlterCreator(AlterCreator):
-    def __init__(self, creators: List[AlterCreator]):
+    def __init__(self, creators: List[AlterCreator], time_multiplier_getter: TimeMultiplierGetter):
         super().__init__(CreatorData(
             any(creator.creator_data.has_color for creator in creators),
             any(creator.creator_data.has_pattern for creator in creators)
         ))
         self.creators = creators
+        self.time_multiplier_getter = time_multiplier_getter
 
     def create(self, start_pixel: int, pixel_count: int, wrap_at: int, wrap_to: int) -> Alter:
         alters = [creator.create(start_pixel, pixel_count, wrap_at, wrap_to) for creator in self.creators]
-        default_percent_getter = ReversingPercentGetter(2.0, 10.0 * 60, 2.0)  # TODO don't hard code speed
-        return AlterBlend(default_percent_getter, alters)
+        default_percent_getter = ReversingPercentGetter(10.0, 10.0 * 60, 10.0)  # By default fade takes 10 seconds
+        return AlterBlend(PercentGetterTimeMultiplier(default_percent_getter, self.time_multiplier_getter), alters)
 
 
 @dataclass
@@ -136,6 +139,7 @@ class CreatorSettings:
     pixel_offsets: Dict[str, int]
     current_partition_offset: int
     """The current partition offset. This should first be initialized to the default partition offset, then it may be changed explicitly."""
+    time_multiplier_getter: TimeMultiplierGetter
 
     def get_offset(self, offset_string: str) -> Optional[int]:
         try:
@@ -183,9 +187,11 @@ def __split_tokens(tokens: List[Token], split_on: Token) -> List[List[Token]]:
 
 def tokens_to_creator(
     tokens: List[Token],
-    text_to_color_alter: Callable[[str], Optional[Alter]],
-    text_to_pattern_alter: Callable[[str], Optional[Alter]],
-    creator_settings: CreatorSettings
+    text_to_color_alter: Callable[[str, TimeMultiplierGetter], Optional[Alter]],
+    text_to_pattern_alter: Callable[[str, TimeMultiplierGetter], Optional[Alter]],
+    text_to_speed_multiplier: Callable[[str], Optional[float]],
+    creator_settings: CreatorSettings,
+    use_provided_time_multiplier: bool = False
 ) -> Optional[AlterCreator]:
     blended_token_list = __split_tokens(tokens, BLEND_TOKEN)  # split on the blend ("~") token first
     if len(blended_token_list) <= 1:
@@ -197,8 +203,12 @@ def tokens_to_creator(
             assert len(partition_token_list) != 0, "__split_tokens should always at least give us a length of 1!"
             # There are no partitions, so this is truly our "base case"
             tokens = partition_token_list[0]
+            directly_nested_time_multiplier: Optional[float] = None
             for token in tokens:
                 if isinstance(token, StringToken):
+                    time_multiplier = text_to_speed_multiplier(token.data)
+                    if time_multiplier is not None:
+                        directly_nested_time_multiplier = time_multiplier
                     # See if there's an explicitly defined offset that we will make "default" before we add creators to creators_to_combine
                     offset_string = get_string_after(token.data, "offset")
                     if offset_string is not None:
@@ -208,19 +218,21 @@ def tokens_to_creator(
                                 creator_settings,
                                 current_partition_offset=new_offset
                             )
-
+            time_multiplier_getter = creator_settings.time_multiplier_getter
+            if not use_provided_time_multiplier and directly_nested_time_multiplier is not None:
+                time_multiplier_getter = lambda: directly_nested_time_multiplier
             creators_to_combine = []
             for token in tokens:
                 if isinstance(token, StringToken):
-                    color_alter = text_to_color_alter(token.data)
-                    pattern_alter = text_to_pattern_alter(token.data)
+                    color_alter = text_to_color_alter(token.data, time_multiplier_getter)
+                    pattern_alter = text_to_pattern_alter(token.data, time_multiplier_getter)
                     if color_alter is not None:
                         creators_to_combine.append(StaticCreator(CreatorData(True, False), color_alter))
                     if pattern_alter is not None:
                         creators_to_combine.append(StaticCreator(CreatorData(False, True), pattern_alter))
                 elif isinstance(token, OrganizerToken):
                     creator = tokens_to_creator(
-                        token.tokens, text_to_color_alter, text_to_pattern_alter,
+                        token.tokens, text_to_color_alter, text_to_pattern_alter, text_to_speed_multiplier,
                         creator_settings
                     )
                     creators_to_combine.append(creator)
@@ -235,12 +247,12 @@ def tokens_to_creator(
                     color_creators.append(creator)
                 else:
                     pattern_creators.append(creator)
-            return CombinerCreator(color_creators, pattern_creators)
+            return CombinerCreator(color_creators, pattern_creators, directly_nested_time_multiplier)
         else:  # This is our case for partitioning
             creators_to_partition = []
             for token_list in partition_token_list:
                 creator = tokens_to_creator(
-                    token_list, text_to_color_alter, text_to_pattern_alter,
+                    token_list, text_to_color_alter, text_to_pattern_alter, text_to_speed_multiplier,
                     dataclasses.replace(creator_settings, current_partition_offset=0)
                 )
                 creators_to_partition.append(creator or NOTHING_CREATOR)
@@ -248,7 +260,7 @@ def tokens_to_creator(
     else:  # This is the case for blending
         creators_to_blend = []
         for token_list in blended_token_list:
-            creator = tokens_to_creator(token_list, text_to_color_alter, text_to_pattern_alter, creator_settings)
+            creator = tokens_to_creator(token_list, text_to_color_alter, text_to_pattern_alter, text_to_speed_multiplier, creator_settings)
             creators_to_blend.append(creator or NOTHING_CREATOR)
 
-        return BlendAlterCreator(creators_to_blend)
+        return BlendAlterCreator(creators_to_blend, creator_settings.time_multiplier_getter)

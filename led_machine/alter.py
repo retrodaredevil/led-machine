@@ -2,6 +2,7 @@ from abc import abstractmethod, ABC
 from typing import Optional, List, Union, Callable
 
 from led_machine.color import Color, ColorAlias
+from led_machine.types import TimeMultiplierGetter
 
 Position = Union[int, float]
 
@@ -51,7 +52,7 @@ class AlterSolid(Alter):
 
 
 class AlterSpeedOfAlter(Alter):
-    def __init__(self, alter: Alter, time_multiplier_getter: Callable[[], float]):
+    def __init__(self, alter: Alter, time_multiplier_getter: TimeMultiplierGetter):
         self.alter = alter
         self.time_multiplier_getter = time_multiplier_getter
 
