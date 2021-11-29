@@ -107,6 +107,7 @@ class PartitionAlterCreator(AlterCreator):
                 start_pixel = wrap_to + leftover_length
             else:
                 partitions.append((start_pixel, length))
+                # note that the wrap_at and wrap_to don't really matter too much here
                 alter = creator.create(start_pixel, length, start_pixel + length, start_pixel)
                 start_pixel += length
                 if start_pixel >= wrap_at:
@@ -220,7 +221,7 @@ def tokens_to_creator(
                 elif isinstance(token, OrganizerToken):
                     creator = tokens_to_creator(
                         token.tokens, text_to_color_alter, text_to_pattern_alter,
-                        dataclasses.replace(creator_settings, current_partition_offset=0)
+                        creator_settings
                     )
                     creators_to_combine.append(creator)
                 elif isinstance(token, StaticToken):
@@ -238,7 +239,10 @@ def tokens_to_creator(
         else:  # This is our case for partitioning
             creators_to_partition = []
             for token_list in partition_token_list:
-                creator = tokens_to_creator(token_list, text_to_color_alter, text_to_pattern_alter, creator_settings)
+                creator = tokens_to_creator(
+                    token_list, text_to_color_alter, text_to_pattern_alter,
+                    dataclasses.replace(creator_settings, current_partition_offset=0)
+                )
                 creators_to_partition.append(creator or NOTHING_CREATOR)
             return PartitionAlterCreator(creators_to_partition, creator_settings.current_partition_offset)
     else:  # This is the case for blending

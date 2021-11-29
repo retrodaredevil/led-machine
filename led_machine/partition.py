@@ -7,7 +7,6 @@ from led_machine.color import Color
 class AlterPartition(Alter):
     def __init__(self, override_list: Sequence[Tuple[Alter, Sequence[Tuple[Position, Position]]]]):
         """
-        :param setting: The base setting
         :param override_list: A list of tuples where tuple[0] is the setting, and tuple[1] is a list of tuples of (int, int),
         where the first int is the start, and the second is the length of the partition
         """
