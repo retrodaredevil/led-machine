@@ -2,7 +2,7 @@ import json
 import time
 from pathlib import Path
 
-from led_machine.alter import AlterDim, AlterMultiplexer, LedMetadata
+from led_machine.alter import AlterDim, AlterMultiplexer, LedMetadata, AlterNothing
 from led_machine.block import AlterBlock
 from led_machine.color import ColorConstants
 from led_machine.color_parse import parse_colors
@@ -36,9 +36,9 @@ def main():
     slack_helper = SlackHelper(slack_bot_token, slack_app_token, slack_channel)
 
     main_led_state = LedState(NUMBER_OF_PIXELS)
-    main_led_state.main_alter = main_led_state.parse_color_setting("rainbow")
 
     josh_lamp_led_state = LedState(NUMBER_OF_PIXELS)
+    main_led_state.main_alter = AlterNothing()
     alter_dim = AlterDim(0.8)
     # dimmer_percent_getter = PercentGetterHolder(ConstantPercentGetter(1.0))
     # """A percent getter which stores a percent getter that dynamically controls the brightness of the lights."""
