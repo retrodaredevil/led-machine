@@ -38,7 +38,7 @@ def main():
     main_led_state = LedState(NUMBER_OF_PIXELS)
 
     josh_lamp_led_state = LedState(NUMBER_OF_PIXELS)
-    main_led_state.main_alter = AlterNothing()
+    josh_lamp_led_state.main_alter = AlterNothing()
     alter_dim = AlterDim(0.8)
     # dimmer_percent_getter = PercentGetterHolder(ConstantPercentGetter(1.0))
     # """A percent getter which stores a percent getter that dynamically controls the brightness of the lights."""
