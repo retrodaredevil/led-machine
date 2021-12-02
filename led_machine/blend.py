@@ -14,6 +14,8 @@ class AlterBlend(Alter):
     def _get_alter(self, percent: float) -> Tuple[Alter, Alter, float]:
         # a value of 0.0 should give exactly self.colors[0]
         offset = percent * len(self.alters)
+        if offset == len(self.alters):  # sometimes percent=1.0, and other times it might be close enough for some rounding error idk
+            offset = 0.0
         left_index = int(offset)
         right_index = (left_index + 1) % len(self.alters)
         lerp_percent = offset % 1.0

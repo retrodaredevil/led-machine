@@ -12,6 +12,5 @@ setup(
                                       ]},
     install_requires=["adafruit-circuitpython-neopixel",
                       "slack_sdk",
-                      "soundmeter",
                       ]
 )
